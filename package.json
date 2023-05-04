@@ -1,17 +1,34 @@
 {
+  "name": "nosapi",
+  "description": "A monorepo with Tools and APIs for all things NosTale",
   "private": true,
+  "packageManager": "pnpm@7.15.0",
+  "keywords": [
+    "api",
+    "nostale",
+    "nosapi",
+    "tools"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zakuciael/nosapi"
+  },
+  "contributors": [
+    "Krzysztof Saczuk <zakku@zakku.eu>",
+    "Gorlik <kamil@gorlik.pl>"
+  ],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "lint": "turbo run lint"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
-    "eslint-config-custom": "workspace:*",
-    "prettier": "^2.5.1",
-    "turbo": "latest"
-  },
-  "packageManager": "pnpm@7.15.0",
-  "name": "nosapi"
+    "prettier": "^2.8.8",
+    "turbo": "^1.9.3"
+  }
 }
