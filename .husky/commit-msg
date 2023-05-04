@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+#
+# PURUM Calendar
+# Copyright (c) 2023 Krzysztof Saczuk <zakku@zakku.eu>.
+# MIT Licensed
+#
+
+. "$(dirname -- "$0")/_/husky.sh"
+
+pnpm commitlint --edit "$1"
