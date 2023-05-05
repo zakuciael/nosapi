@@ -4,18 +4,20 @@
   "private": true,
   "packageManager": "pnpm@7.15.0",
   "keywords": [
-    "api",
-    "nostale",
     "nosapi",
-    "tools"
+    "api",
+    "data",
+    "tools",
+    "nostale",
+    "parser"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/zakuciael/nosapi"
   },
   "contributors": [
-    "Krzysztof Saczuk <zakku@zakku.eu>",
-    "Gorlik <kamil@gorlik.pl>"
+    "Krzysztof Saczuk <me@krzysztofsaczuk.pl>",
+    "Kamil Gorlikowski <kamil@gorlik.pl>"
   ],
   "workspaces": [
     "apps/*",
