@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["pnpm-lock.yaml", "**/tsconfig.json", "**tsup.config.ts"],
+  "globalDependencies": ["pnpm-lock.yaml", "**/tsconfig.json", "**/tsup.config.ts"],
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
@@ -12,25 +12,21 @@
       "dependsOn": ["^build"],
       "inputs": [
         "public/**",
-        "src/**/*.tsx",
-        "src/**/*.ts",
-        "src/**/*.css",
-        "next.config.js",
-        "tailwind.config.js",
-        "postcss.config.js"
+        "src/**/*.{ts,tsx,css}",
+        "next.config.{mjs,cjs,js}",
+        "tailwind.config.{mjs,cjs,js,ts}",
+        "postcss.config.{mjs,cjs,js}"
       ],
       "outputs": [".next/**", "!.next/cache/**"],
       "outputMode": "full"
     },
     "lint": {
       "inputs": [
-        "tsconfig.eslint.json",
-        "src/**/*.tsx",
-        "src/**/*.ts",
-        "src/**/*.css",
-        ".eslintrc.cjs",
+        "src/**/*.{ts,tsx,css}",
+        ".eslintrc.{mjs,cjs,js}",
         ".prettierignore",
-        ".prettier.config.cjs"
+        "prettier.config.{mjs,cjs,js}",
+        "tsconfig.eslint.json"
       ],
       "outputMode": "errors-only"
     },
