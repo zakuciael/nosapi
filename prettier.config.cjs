@@ -1,7 +1,7 @@
 /** @type {import("prettier").Config} **/
 const config = {
     printWidth: 110,
-    tabWidth: 4,
+    tabWidth: 2,
     endOfLine: "lf",
     semi: true,
     useTabs: false,
@@ -10,14 +10,6 @@ const config = {
     trailingComma: "all",
     arrowParens: "always",
     quoteProps: "as-needed",
-    overrides: [
-        {
-            files: ["{**/*,*}.json"],
-            options: {
-                tabWidth: 2,
-            },
-        },
-    ],
 };
 
 module.exports = config;

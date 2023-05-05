@@ -3,6 +3,10 @@
   "description": "A monorepo with Tools and APIs for all things NosTale",
   "private": true,
   "packageManager": "pnpm@7.15.0",
+  "type": "module",
+  "engines": {
+    "node": ">=14.16"
+  },
   "keywords": [
     "nosapi",
     "api",
@@ -28,7 +32,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "lint:fix": "turbo run lint:fix"
+    "test": "turbo run test"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
@@ -36,14 +40,13 @@
     "@types/eslint": "^8.37.0",
     "@types/node": "^17.0.12",
     "@types/prettier": "^2.7.2",
-    "@typescript-eslint/eslint-plugin": "^5.59.2",
-    "@typescript-eslint/parser": "^5.59.2",
-    "eslint": "^7.32.0",
-    "eslint-config-next": "13.4.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-config-turbo": "^1.9.3",
-    "eslint-plugin-tailwindcss": "^3.11.0",
+    "eslint": "^8.5.0",
+    "eslint-config-neon": "^0.1.46",
     "prettier": "^2.8.8",
-    "turbo": "^1.9.3"
+    "tsup": "^6.7.0",
+    "turbo": "^1.9.3",
+    "typescript": "5.1.0-beta",
+    "vercel": "^29.1.1",
+    "vitest": "^0.31.0"
   }
 }

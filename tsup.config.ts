@@ -1,0 +1,36 @@
+import { defineConfig, type Options } from "tsup";
+
+export const createTsupConfig = ({
+  entry = ["src/index.ts"],
+  external = [],
+  noExternal = [],
+  platform = "node",
+  format = ["esm"],
+  target = "es2022",
+  skipNodeModulesBundle = true,
+  clean = true,
+  shims = false,
+  minify = false,
+  splitting = false,
+  keepNames = true,
+  dts = true,
+  sourcemap = true,
+  esbuildPlugins = [],
+}: Options = {}) =>
+  defineConfig({
+    entry,
+    external,
+    noExternal,
+    platform,
+    format,
+    target,
+    skipNodeModulesBundle,
+    clean,
+    shims,
+    minify,
+    splitting,
+    keepNames,
+    dts,
+    sourcemap,
+    esbuildPlugins,
+  });

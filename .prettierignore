@@ -4,9 +4,6 @@
 .run/
 node_modules/
 coverage/
-build/
-dist/
-out/
 
 .next
 .vercel
