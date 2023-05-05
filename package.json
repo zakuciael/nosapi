@@ -19,6 +19,7 @@
     "Krzysztof Saczuk <me@krzysztofsaczuk.pl>",
     "Kamil Gorlikowski <kamil@gorlik.pl>"
   ],
+  "license": "Apache-2.0",
   "workspaces": [
     "apps/*",
     "packages/*"
