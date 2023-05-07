@@ -17,7 +17,7 @@
     "data"
   ],
   "repository": {
-    "url": "https://github.com/zakuciael/node-qtcre.git",
+    "url": "https://github.com/zakuciael/nosapi.git",
     "directory": "packages/data",
     "type": "git"
   },
