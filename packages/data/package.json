@@ -26,9 +26,13 @@
     "Gorlik <kamil@gorlik.pl>"
   ],
   "scripts": {
-    "lint": "eslint --no-error-on-unmatched-pattern \"src/**/*.ts\" \"__tests__/**/*.ts\"",
-    "test": "vitest run",
-    "build": "tsup"
+    "typecheck": "tsc --noEmit",
+    "build": "tsup",
+    "lint": "eslint . --report-unused-disable-directives",
+    "lint:fix": "pnpm lint --fix",
+    "format": "prettier --write --plugin-search-dir=. **/*.{cjs,mjs,ts,tsx,md,json} --ignore-unknown --no-error-on-unmatched-pattern",
+    "format:check": "pnpm format --check",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/node": "16.18.26",

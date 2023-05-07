@@ -21,6 +21,7 @@
       "outputMode": "full"
     },
     "lint": {
+      "dependsOn": ["^build"],
       "inputs": [
         "src/**/*.{ts,tsx,css}",
         ".eslintrc.{mjs,cjs,js}",
@@ -30,7 +31,51 @@
       ],
       "outputMode": "errors-only"
     },
+    "lint:fix": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx,css}",
+        "**/.eslintrc.{mjs,cjs,js}",
+        "**/.prettierignore",
+        "**/prettier.config.{mjs,cjs,js}",
+        "**/tsconfig.eslint.json"
+      ],
+      "outputMode": "errors-only"
+    },
+    "format": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx,css}",
+        "**/.eslintrc.{mjs,cjs,js}",
+        "**/tsconfig.eslint.json",
+        "**/.prettierignore",
+        "**/prettier.config.{mjs,cjs,js}"
+      ],
+      "outputMode": "errors-only"
+    },
+    "format:check": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx,css}",
+        "**/.eslintrc.{mjs,cjs,js}",
+        "**/tsconfig.eslint.json",
+        "**/.prettierignore",
+        "**/prettier.config.{mjs,cjs,js}"
+      ],
+      "outputMode": "errors-only"
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.{ts,tsx,css}"],
+      "outputMode": "errors-only"
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "__tests__/**/*.ts", "**/vitest.config.ts"],
+      "outputMode": "new-only"
+    },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     }

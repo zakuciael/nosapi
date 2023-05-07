@@ -29,10 +29,16 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "test": "turbo run test"
+    "typecheck": "turbo typecheck --parallel",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "manypkg check && turbo lint --parallel",
+    "lint:fix": "manypkg fix &&& turbo lint:fix --parallel",
+    "format": "turbo format --parallel && prettier --write *.{cjs,md,json} --ignore-unknown --no-error-on-unmatched-pattern",
+    "format:check": "turbo format:check --parallel && prettier --check *.{cjs,md,json} --ignore-unknown --no-error-on-unmatched-pattern",
+    "check": "manypkg check && turbo lint typecheck format:check --parallel",
+    "release": "changeset version",
+    "test": "turbo test --parallel"
   },
   "dependencies": {
     "@changesets/cli": "^2.26.1",
