@@ -11,6 +11,7 @@ const config = {
   },
   experimental: {
     typedRoutes: true,
+    runtime: "experimental-edge",
   },
   i18n: {
     locales: ["en"],
