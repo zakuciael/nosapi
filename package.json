@@ -38,6 +38,7 @@
     "@changesets/cli": "^2.26.1",
     "@commitlint/cli": "^17.6.3",
     "@commitlint/config-conventional": "^17.6.3",
+    "@manypkg/cli": "^0.20.0",
     "@types/eslint": "^8.37.0",
     "@types/node": "16.18.26",
     "@types/prettier": "^2.7.2",
