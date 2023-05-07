@@ -18,7 +18,11 @@
 </p>
 
 ## License
-Distributed under the Apache License 2.0. See [LICENSE](https://github.com/zakuciael/node-qtcre/blob/main/LICENSE) for more information.
+
+Distributed under the Apache License 2.0. See [LICENSE](https://github.com/zakuciael/node-qtcre/blob/main/LICENSE) for
+more information.
 
 ## Notice of Non-Affiliation and Disclaimer
-This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Entwell Co., Gameforge 4D GmbH or any of their subsidiaries or affiliates.
+
+This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Entwell
+Co., Gameforge 4D GmbH or any of their subsidiaries or affiliates.
