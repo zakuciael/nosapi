@@ -1,5 +1,11 @@
 # @nosapi/data
 
+## 0.1.2
+
+### Patch Changes
+
+- [`d3a1679`](https://github.com/zakuciael/nosapi/commit/d3a167919089800ccf406b230ca0cabde48960a3) Thanks [@zakuciael](https://github.com/zakuciael)! - add license and limit files included in the final build
+
 ## 0.1.1
 
 ### Patch Changes
