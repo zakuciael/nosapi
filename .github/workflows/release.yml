@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Check for errors
-        run: pnpm check
+        run: pnpm check --filter="./packages/*"
       - name: Build packages
         run: pnpm build --filter="./packages/*"
       - name: Create PR or publish to NPM

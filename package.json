@@ -37,7 +37,7 @@
     "format": "turbo format --parallel && prettier --write *.{cjs,md,json} --ignore-unknown --no-error-on-unmatched-pattern",
     "format:check": "turbo format:check --parallel && prettier --check *.{cjs,md,json} --ignore-unknown --no-error-on-unmatched-pattern",
     "check": "manypkg check && turbo lint typecheck format:check --parallel",
-    "release": "changeset version",
+    "release": "changeset version && pnpm install --lockfile-only",
     "test": "turbo test --parallel"
   },
   "dependencies": {
