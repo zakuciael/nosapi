@@ -5,8 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["src/**/*.ts"],
-      "outputs": ["dist/**"],
-      "outputMode": "errors-only"
+      "outputs": ["dist/**"]
     },
     "@nosapi/website#build": {
       "dependsOn": ["^build"],
@@ -17,8 +16,7 @@
         "tailwind.config.{mjs,cjs,js,ts}",
         "postcss.config.{mjs,cjs,js}"
       ],
-      "outputs": [".next/**", "!.next/cache/**"],
-      "outputMode": "full"
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
       "dependsOn": ["^build"],
@@ -28,8 +26,7 @@
         ".prettierignore",
         "prettier.config.{mjs,cjs,js}",
         "tsconfig.eslint.json"
-      ],
-      "outputMode": "errors-only"
+      ]
     },
     "lint:fix": {
       "dependsOn": ["^build"],
@@ -39,8 +36,7 @@
         "**/.prettierignore",
         "**/prettier.config.{mjs,cjs,js}",
         "**/tsconfig.eslint.json"
-      ],
-      "outputMode": "errors-only"
+      ]
     },
     "format": {
       "dependsOn": ["^build"],
@@ -50,8 +46,7 @@
         "**/tsconfig.eslint.json",
         "**/.prettierignore",
         "**/prettier.config.{mjs,cjs,js}"
-      ],
-      "outputMode": "errors-only"
+      ]
     },
     "format:check": {
       "dependsOn": ["^build"],
@@ -61,18 +56,15 @@
         "**/tsconfig.eslint.json",
         "**/.prettierignore",
         "**/prettier.config.{mjs,cjs,js}"
-      ],
-      "outputMode": "errors-only"
+      ]
     },
     "typecheck": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.{ts,tsx,css}"],
-      "outputMode": "errors-only"
+      "inputs": ["src/**/*.{ts,tsx,css}"]
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "__tests__/**/*.ts", "**/vitest.config.ts"],
-      "outputMode": "new-only"
+      "inputs": ["src/**/*.ts", "__tests__/**/*.ts", "**/vitest.config.ts"]
     },
     "dev": {
       "dependsOn": ["^build"],
