@@ -31,6 +31,7 @@
     "build": "tsup"
   },
   "devDependencies": {
+    "@types/node": "16.18.26",
     "eslint": "^8.5.0",
     "tsup": "^6.7.0",
     "typescript": "5.1.0-beta",
