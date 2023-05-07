@@ -11,10 +11,7 @@
   },
   "files": [
     "dist/**",
-    "CHANGELOG.md",
-    "LICENSE",
-    "README.md",
-    "package.json"
+    "CHANGELOG.md"
   ],
   "packageManager": "pnpm@7.15.0",
   "keywords": [
