@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: pnpm
+      - name: Install pnpm & dependencies
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          run_install: true
+      - name: Lint packages (PR)
+        if: ${{ github.event_name != 'push' }}
+        run: pnpm lint --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]" -- --format=compact
+      - name: Lint packages (Push)
+        if: ${{ github.event_name == 'push' }}
+        run: pnpm lint --filter="...[HEAD^1]" -- --format=compact
+  format:
+    runs-on: ubuntu-latest
+    name: Prettier
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: pnpm
+      - name: Install pnpm & dependencies
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          run_install: true
+      - name: Validate code style (PR)
+        if: ${{ github.event_name != 'push' }}
+        run: pnpm format:check --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
+      - name: Validate code style (Push)
+        if: ${{ github.event_name == 'push' }}
+        run: pnpm format:check -filter="...[HEAD^1]"
+  typescript:
+    runs-on: ubuntu-latest
+    name: TypeScript
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: pnpm
+      - name: Install pnpm & dependencies
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          run_install: true
+      - name: Register Problem Matcher
+        run: echo "##[add-matcher].github/tsc.json"
+      - name: Validate types (PR)
+        if: ${{ github.event_name != 'push' }}
+        run: pnpm typecheck --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
+      - name: Validate types (Push)
+        if: ${{ github.event_name == 'push' }}
+        run: pnpm typecheck -filter="...[HEAD^1]"
+  tests:
+    runs-on: ubuntu-latest
+    name: Tests
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: pnpm
+      - name: Install pnpm & dependencies
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          run_install: true
+      - name: Run tests (PR)
+        if: ${{ github.event_name != 'push' }}
+        run: pnpm test --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
+      - name: Run tests (Push)
+        if: ${{ github.event_name == 'push' }}
+        run: pnpm test -filter="...[HEAD^1]"
