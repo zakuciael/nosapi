@@ -17,6 +17,7 @@ const config = {
     "react/react-in-jsx-scope": 0,
     "react/jsx-filename-extension": [1, { extensions: [".tsx"] }],
   },
+  ignorePatterns: ["next-env.d.ts"],
 };
 
 module.exports = config;
