@@ -28,7 +28,7 @@ jobs:
       - name: Check for errors
         run: pnpm check
       - name: Build packages
-        run: pnpm build
+        run: pnpm build --filter="./packages/*"
       - name: Create PR or publish to NPM
         uses: changesets/action@v1.4.1
         with:
