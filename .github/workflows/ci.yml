@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  push:
   pull_request:
+    branches: [ "*" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -32,12 +32,9 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install
-      - name: Lint packages (PR)
+      - name: Lint packages
         if: ${{ github.event_name != 'push' }}
         run: pnpm lint --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]" -- --format=compact
-      - name: Lint packages (Push)
-        if: ${{ github.event_name == 'push' }}
-        run: pnpm lint --filter="...[HEAD^1]" -- --format=compact
   format:
     runs-on: ubuntu-latest
     name: Prettier
@@ -57,12 +54,9 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install
-      - name: Validate code style (PR)
+      - name: Validate code style
         if: ${{ github.event_name != 'push' }}
         run: pnpm format:check --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
-      - name: Validate code style (Push)
-        if: ${{ github.event_name == 'push' }}
-        run: pnpm format:check --filter="...[HEAD^1]"
   typescript:
     runs-on: ubuntu-latest
     name: TypeScript
@@ -84,12 +78,9 @@ jobs:
         run: pnpm install
       - name: Register Problem Matcher
         run: echo "##[add-matcher].github/tsc.json"
-      - name: Validate types (PR)
+      - name: Validate types
         if: ${{ github.event_name != 'push' }}
         run: pnpm typecheck --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
-      - name: Validate types (Push)
-        if: ${{ github.event_name == 'push' }}
-        run: pnpm typecheck --filter="...[HEAD^1]"
   tests:
     runs-on: ubuntu-latest
     name: Tests
@@ -109,9 +100,6 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install
-      - name: Run tests (PR)
+      - name: Run tests
         if: ${{ github.event_name != 'push' }}
         run: pnpm test --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
-      - name: Run tests (Push)
-        if: ${{ github.event_name == 'push' }}
-        run: pnpm test --filter="...[HEAD^1]"
