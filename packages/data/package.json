@@ -29,6 +29,9 @@
     "Krzysztof Saczuk <zakku@zakku.eu>",
     "Gorlik <kamil@gorlik.pl>"
   ],
+  "publishConfig": {
+    "provenance": true
+  },
   "license": "Apache-2.0",
   "scripts": {
     "typecheck": "tsc --noEmit",
