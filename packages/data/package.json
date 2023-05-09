@@ -1,7 +1,7 @@
 {
   "name": "@nosapi/data",
   "version": "0.1.2",
-  "description": "A library for parsing NosTale data files",
+  "description": "A library for parsing NosTale's .NOS files",
   "type": "module",
   "exports": {
     ".": {
