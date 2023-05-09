@@ -3,6 +3,8 @@ name: Release
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - "packages/**"
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -36,9 +38,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Check for errors
-        run: pnpm check --filter="./packages/*"
+        run: pnpm check --filter="...{packages/*}[origin/main]"
       - name: Build packages
-        run: pnpm build --filter="./packages/*"
+        run: pnpm build --filter="...{packages/*}[origin/main]"
       - name: Create PR or publish to NPM
         uses: changesets/action@v1.4.1
         with:
