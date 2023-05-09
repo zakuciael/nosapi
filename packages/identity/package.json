@@ -1,0 +1,49 @@
+{
+  "name": "@nosapi/blackbox",
+  "version": "0.1.2",
+  "description": "A library for parsing NosTale data files",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**",
+    "CHANGELOG.md"
+  ],
+  "packageManager": "pnpm@7.15.0",
+  "keywords": [
+    "nostale",
+    "nosapi",
+    "tools",
+    "data"
+  ],
+  "repository": {
+    "url": "https://github.com/zakuciael/nosapi.git",
+    "directory": "packages/blackbox",
+    "type": "git"
+  },
+  "contributors": [
+    "Krzysztof Saczuk <zakku@zakku.eu>",
+    "Gorlik <kamil@gorlik.pl>"
+  ],
+  "license": "Apache-2.0",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup",
+    "lint": "eslint . --report-unused-disable-directives",
+    "lint:fix": "pnpm lint --fix",
+    "format": "prettier --write --plugin-search-dir=. **/*.{cjs,mjs,ts,tsx,md,json} --ignore-unknown --no-error-on-unmatched-pattern",
+    "format:check": "pnpm format --check",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "16.18.26",
+    "eslint": "^8.5.0",
+    "tsup": "^6.7.0",
+    "typescript": "5.1.0-beta",
+    "vitest": "^0.31.0"
+  }
+}
