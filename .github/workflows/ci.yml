@@ -5,7 +5,7 @@ on:
     branches: [ "*" ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
 env:
@@ -34,8 +34,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Lint packages
-        if: ${{ github.event_name != 'push' }}
-        run: pnpm lint --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]" -- --format=compact
+        run: pnpm lint --filter="...[origin/${{ github.base_ref }}]" -- --format=compact
   format:
     runs-on: ubuntu-latest
     name: Prettier
@@ -57,8 +56,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Validate code style
-        if: ${{ github.event_name != 'push' }}
-        run: pnpm format:check --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
+        run: pnpm format:check --filter="...[origin/${{ github.base_ref }}]"
   typescript:
     runs-on: ubuntu-latest
     name: TypeScript
@@ -82,8 +80,7 @@ jobs:
       - name: Register Problem Matcher
         run: echo "##[add-matcher].github/tsc.json"
       - name: Validate types
-        if: ${{ github.event_name != 'push' }}
-        run: pnpm typecheck --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
+        run: pnpm typecheck --filter="...[origin/${{ github.base_ref }}]"
   tests:
     runs-on: ubuntu-latest
     name: Tests
@@ -105,5 +102,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run tests
-        if: ${{ github.event_name != 'push' }}
-        run: pnpm test --filter="...[origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'main' }}]"
+        run: pnpm test --filter="...[origin/${{ github.base_ref }}]"
