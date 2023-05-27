@@ -10,6 +10,10 @@ export default defineConfig({
       ".git/**/*",
       ".cache/**/*",
     ],
+    environmentMatchGlobs: [
+      ["**/tests/**/*.edge.{test,spec}.{ts,tsx}", "edge-runtime"],
+      ["**/tests/**/*.{test,spec}.{ts,tsx}", "node"],
+    ],
     passWithNoTests: true,
   },
 });
