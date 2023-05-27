@@ -33,6 +33,5 @@ export const getFileVersion = (file: Uint8Array) => {
     }
   }
 
-  const decoder = new TextDecoder("utf16le");
-  return decoder.decode(file.subarray(start, end));
+  return new TextDecoder("utf-16le").decode(file.subarray(start, end));
 };
