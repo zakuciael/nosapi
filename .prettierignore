@@ -1,18 +1,16 @@
 .idea/
 .vscode/
-.husky/
 .run/
-node_modules/
-coverage/
+**/node_modules/**
+**/coverage/**
 
-.next
-.vercel
+**/.next/**
+**/.vercel/**
 
-next-env.d.ts
-pnpm-lock.yaml
-pnpm-workspace.yaml
-LICENSE
-*.md
-.gitignore
-*.ico
-*.svg
+**/next-env.d.ts
+**/pnpm-lock.yaml
+**/pnpm-workspace.yaml
+**/LICENSE
+**/.gitignore
+**/*.ico
+**/*.svg
