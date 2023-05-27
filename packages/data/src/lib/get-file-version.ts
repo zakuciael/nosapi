@@ -1,6 +1,6 @@
 import { findPattern } from "../utils/find-pattern";
 
-const SEARCH_PATTERN = Buffer.from([
+const SEARCH_PATTERN = new Uint8Array([
   0x46, 0x00, 0x69, 0x00, 0x6c, 0x00, 0x65, 0x00, 0x56, 0x00, 0x65, 0x00, 0x72, 0x00, 0x73, 0x00, 0x69, 0x00,
   0x6f, 0x00, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x00,
 ]);
@@ -20,7 +20,7 @@ const SEARCH_PATTERN = Buffer.from([
  * console.log(fileVersion) // 0.9.3.3191
  * ```
  */
-export const getFileVersion = (file: Buffer) => {
+export const getFileVersion = (file: Uint8Array) => {
   const start = findPattern(file, SEARCH_PATTERN, true);
   let end = file.length;
 
@@ -33,5 +33,6 @@ export const getFileVersion = (file: Buffer) => {
     }
   }
 
-  return file.toString("utf16le", start, end);
+  const decoder = new TextDecoder("utf16le");
+  return decoder.decode(file.subarray(start, end));
 };

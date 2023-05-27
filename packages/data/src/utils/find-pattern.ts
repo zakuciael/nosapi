@@ -7,7 +7,7 @@
  * @param end - Option specifying if the returned offset should be before the pattern (false) or after it (true).
  * @returns The offset pointing to the beginning of the pattern or the end of it.
  */
-export const findPattern = (buf: Buffer, pattern: Buffer, end: boolean = false): number => {
+export const findPattern = (buf: Uint8Array, pattern: Uint8Array, end: boolean = false): number => {
   const compare = (bufOffset: number): boolean => {
     for (const [patternOffset, element] of pattern.entries()) {
       if (buf[bufOffset + patternOffset] === element) continue;
