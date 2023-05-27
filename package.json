@@ -24,10 +24,6 @@
     "Kamil Gorlikowski <kamil@gorlik.pl>"
   ],
   "license": "Apache-2.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "typecheck": "turbo typecheck --parallel",
     "dev": "turbo dev",
@@ -47,7 +43,7 @@
     "@commitlint/config-conventional": "^17.6.3",
     "@manypkg/cli": "^0.20.0",
     "@types/eslint": "^8.37.0",
-    "@types/node": "16.18.26",
+    "@types/node": "18.16.16",
     "@types/prettier": "^2.7.2",
     "eslint": "^8.5.0",
     "eslint-config-neon": "^0.1.46",
