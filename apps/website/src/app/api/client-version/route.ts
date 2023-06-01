@@ -6,8 +6,11 @@ import { type FileData, gameforgeClient } from "~/data/gameforge";
 export const runtime = "edge";
 
 export const GET = async () => {
+  console.time("index");
   const { entries: files } = await gameforgeClient("/index");
+  console.timeEnd("index");
 
+  console.time("download");
   const clients = files.reduce<[FileData, FileData]>((acc, fileData) => {
     switch (fileData.file) {
       case "NostaleClientX.exe":
@@ -26,8 +29,10 @@ export const GET = async () => {
   const [clientX, clientGL] = (await Promise.all(
     clients.map(async (fileData) => gameforgeClient("/download", { path: fileData.path })),
   )) as [ArrayBuffer, ArrayBuffer];
+  console.timeEnd("download");
 
-  return NextResponse.json(
+  console.time("hash");
+  const response = NextResponse.json(
     {
       md5: {
         client: SparkMDArrayBuffer.hash(clientX),
@@ -41,4 +46,7 @@ export const GET = async () => {
       },
     },
   );
+
+  console.timeEnd("hash");
+  return response;
 };

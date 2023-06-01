@@ -50,7 +50,6 @@ export const gameforgeClient = createSafeClient<Router, [Path], Routes>(router, 
       const url = new URL(input.path, "http://patches.gameforge.com/");
       const requestInit: RequestInit = {
         method: "GET",
-        cache: "no-cache",
       };
 
       return (await fetch(url, requestInit)).arrayBuffer();
