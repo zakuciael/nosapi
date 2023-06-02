@@ -1,1 +1,1 @@
-const test = () => "hello, world!";
+export { getFileVersion } from "./lib/get-file-version";

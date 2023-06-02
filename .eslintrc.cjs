@@ -9,6 +9,7 @@ const config = {
   overrides: [
     {
       rules: {
+        "tsdoc/syntax": ["off"],
         "@typescript-eslint/consistent-type-imports": [
           "error",
           {
