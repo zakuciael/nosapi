@@ -1,5 +1,11 @@
 # @nosapi/data
 
+## 0.2.0
+
+### Minor Changes
+
+- [#9](https://github.com/zakuciael/nosapi/pull/9) [`1f24e3e`](https://github.com/zakuciael/nosapi/commit/1f24e3e44f775585e599f31a8f2704385ed9c8a0) Thanks [@zakuciael](https://github.com/zakuciael)! - Implement parser for client version
+
 ## 0.1.2
 
 ### Patch Changes
