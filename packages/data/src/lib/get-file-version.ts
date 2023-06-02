@@ -1,4 +1,3 @@
-import { findNullTermination } from "../utils/find-null-termination";
 import { findPattern } from "../utils/find-pattern";
 
 const SEARCH_PATTERN = new Uint8Array([
@@ -10,7 +9,7 @@ const SEARCH_PATTERN = new Uint8Array([
  * Get the file version from the specified uint8 array.
  *
  * @param file - Buffer containing PE executable file
- * @returns The file version or undefined if the version could not be found.
+ * @returns The file version or undefined if the version could not be found/processed.
  * @example Getting the file version from a local file
  * import { readFile } from "node:fs/promises";
  * import { getFileVersion } from "@nosapi/data";
@@ -23,6 +22,9 @@ export const getFileVersion = (file: Uint8Array) => {
   const start = findPattern(file, SEARCH_PATTERN, true);
   if (start === -1) return undefined;
 
-  const end = findNullTermination(file, start, file.length);
-  return new TextDecoder("utf-16le").decode(file.subarray(start, end));
+  for (let index = start; index < file.byteLength; index += 2)
+    if (file[index] === 0x00 && file[index + 1] === 0x00)
+      return new TextDecoder("utf-16le").decode(file.subarray(start, index));
+
+  return undefined;
 };
