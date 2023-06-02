@@ -19,8 +19,8 @@ const SEARCH_PATTERN = new Uint8Array([
  * console.log(fileVersion) // 0.9.3.3191
  */
 export const getFileVersion = (file: Uint8Array) => {
-  const start = findPattern(file, SEARCH_PATTERN, true);
-  if (start === -1) return undefined;
+  const start = findPattern(file, SEARCH_PATTERN, { after_pattern: true });
+  if (start === undefined) return undefined;
 
   for (let index = start; index < file.byteLength; index += 2)
     if (file[index] === 0x00 && file[index + 1] === 0x00)

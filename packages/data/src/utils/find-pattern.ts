@@ -2,23 +2,31 @@
  * Finds offset on which the specified pattern starts/ends,
  *
  * @internal
- * @param buf - Buffer in which the offset should be searched.
+ * @param buffer - Buffer in which the offset should be searched.
  * @param pattern - The pattern that should be used to find the offset.
- * @param end - Option specifying if the returned offset should be before the pattern (false) or after it (true).
- * @returns The offset pointing to the beginning of the pattern or the end of it.
+ * @param options - Options customizing the behavior of this method.
+ * @param options.after_pattern -
+ * Specifies if the offset should point to the beginning or the end of the found pattern.
+ * @returns The offset pointing to where the pattern begins/ends or undefined if the pattern was not found.
  */
-export const findPattern = (buf: Uint8Array, pattern: Uint8Array, end: boolean = false): number => {
+export const findPattern = (
+  buffer: Uint8Array,
+  pattern: Uint8Array,
+  options: { after_pattern?: boolean },
+) => {
+  const { after_pattern } = { after_pattern: true, ...options };
+
   const compare = (bufOffset: number): boolean => {
     for (const [patternOffset, element] of pattern.entries()) {
-      if (buf[bufOffset + patternOffset] === element) continue;
+      if (buffer[bufOffset + patternOffset] === element) continue;
       return false;
     }
 
     return true;
   };
 
-  for (let offset = 0; offset < buf.length; offset++)
-    if (compare(offset)) return end ? offset + pattern.byteLength : offset;
+  for (let offset = 0; offset < buffer.length; offset++)
+    if (compare(offset)) return after_pattern ? offset + pattern.byteLength : offset;
 
-  return -1;
+  return undefined;
 };
