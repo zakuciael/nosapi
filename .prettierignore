@@ -6,10 +6,11 @@
 
 **/.next/**
 **/.vercel/**
+**/dist/**
 
 **/next-env.d.ts
 **/pnpm-lock.yaml
-**/pnpm-workspace.yaml
+pnpm-workspace.yaml
 **/LICENSE
 **/.gitignore
 **/*.ico
