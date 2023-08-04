@@ -6,7 +6,3 @@ edition = "2021"
 [dependencies]
 rocket = "0.5.0-rc.2"
 rocket-include-static-resources = { version = "0.10.3", features = ["cache"] }
-rocket_contrib = "0.4.11"
-shuttle-rocket = "0.22.0"
-shuttle-runtime = "0.22.0"
-tokio = "1.26.0"
