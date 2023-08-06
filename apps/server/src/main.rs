@@ -1,7 +1,7 @@
 use rocket::figment::providers::Serialized;
-use rocket::figment::Provider;
 use rocket::{routes, Config};
 use rocket_include_static_resources::static_resources_initializer;
+use rocket_okapi::openapi_get_routes;
 
 use crate::config::ServerConfig;
 
@@ -15,5 +15,6 @@ async fn rocket() -> _ {
         .attach(static_resources_initializer!(
             "favicon" => "assets/favicon.ico"
         ))
-        .mount("/", routes![routes::serve::favicon, routes::index::index])
+        .mount("/", routes![routes::serve::favicon])
+        .mount("/", openapi_get_routes![routes::index::index])
 }
