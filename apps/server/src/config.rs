@@ -1,5 +1,4 @@
 use std::net::{IpAddr, Ipv4Addr};
-use std::num::ParseIntError;
 
 use rocket::config::LogLevel;
 use rocket::serde::{Deserialize, Serialize};
@@ -12,39 +11,28 @@ pub struct ServerConfig {
     log_level: LogLevel,
 }
 
-impl ServerConfig {
-    fn debug_default() -> Self {
-        ServerConfig {
-            port: ServerConfig::port().expect("Invalid port specified"),
-            address: IpAddr::V4(Ipv4Addr::LOCALHOST),
-            log_level: LogLevel::Debug,
-        }
-    }
-
-    fn release_default() -> Self {
-        ServerConfig {
-            port: ServerConfig::port().expect("Invalid port specified"),
-            address: IpAddr::V4(Ipv4Addr::UNSPECIFIED),
-            log_level: LogLevel::Normal,
-        }
-    }
-
-    fn port() -> Result<u16, ParseIntError> {
-        std::env::var("PORT")
-            .unwrap_or("8000".to_string())
-            .parse::<u16>()
-    }
-}
-
 impl Default for ServerConfig {
     fn default() -> Self {
+        let port = std::env::var("PORT")
+            .unwrap_or("8000".to_owned())
+            .parse::<u16>()
+            .expect("Invalid port specified");
+
         #[cfg(debug_assertions)]
         {
-            ServerConfig::debug_default()
+            ServerConfig {
+                port,
+                address: IpAddr::V4(Ipv4Addr::LOCALHOST),
+                log_level: LogLevel::Debug,
+            }
         }
         #[cfg(not(debug_assertions))]
         {
-            ServerConfig::release_default()
+            ServerConfig {
+                port,
+                address: IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+                log_level: LogLevel::Normal,
+            }
         }
     }
 }

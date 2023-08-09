@@ -9,9 +9,10 @@ pub struct HelloWorld {
 }
 
 #[openapi]
-#[get("/")]
-pub fn index() -> Json<HelloWorld> {
+#[get("/hello")]
+/// Print Hello, World!
+pub fn hello() -> Json<HelloWorld> {
     Json(HelloWorld {
-        message: "Hello, world!",
+        message: "Hello, World!",
     })
 }
