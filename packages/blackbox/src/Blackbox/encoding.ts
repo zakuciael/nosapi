@@ -81,7 +81,9 @@ export function decode(encodedBlackbox: string) {
   const fingerprint = {};
 
   if (fingerprintArray.length !== BLACKBOX_FIELDS.length) {
-    throw new Error(`Incomplete blackbox (missing fields)`);
+    throw new Error(
+      `Incomplete blackbox (You have ${fingerprintArray.length} fields, but you need ${BLACKBOX_FIELDS.length})`,
+    );
   }
 
   // eslint-disable-next-line unicorn/no-for-loop

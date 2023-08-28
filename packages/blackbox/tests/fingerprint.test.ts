@@ -1,7 +1,14 @@
 /* eslint-disable unicorn/numeric-separators-style */
 /* eslint-disable id-length */
 import { expect, test } from "vitest";
-import { createBlackbox, createEncryptedBlackbox, createFingerprint, safeValidateFingerprint } from "../src";
+import fs from "fs";
+import {
+  createBlackbox,
+  createEncryptedBlackbox,
+  createFingerprint,
+  safeValidateFingerprint,
+  decode,
+} from "../src";
 import type { IFingerprint } from "../src";
 
 // hey, this is created using ChatGPT. If you want use it its 110% propably you will be BANNED!
@@ -82,3 +89,15 @@ test("Prepare to Send thin/codes request", () => {
   createEncryptedBlackbox(fingerprint, gsid, accountId, installationId);
   expect(true).toBe(true);
 });
+
+// XD komendy bo nie umiem uruchomić tego w inny sposób
+// tak serio próbowałem
+// nie da się używać ts-node
+// test("CMD", () => {
+//   const filename = "blackbox.txt";
+
+//   // eslint-disable-next-line n/no-sync
+//   const blackbox = fs.readFileSync(filename, { encoding: "utf8", flag: "r" });
+//   const fingerprint = decode(blackbox);
+//   console.log(JSON.stringify(fingerprint, null, "\t"));
+// });

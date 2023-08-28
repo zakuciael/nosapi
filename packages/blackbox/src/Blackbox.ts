@@ -22,20 +22,21 @@ export function createFingerprint(fingerprint: IFingerprint): IFingerprint {
   const fpParsed = validateFingerprint(fingerprint);
   const fp: IFingerprint = {
     ...fpParsed,
-    dP: randomNumber(0, 50),
-    dF: randomNumber(0, 50),
-    dW: randomNumber(0, 50),
-    dC: randomNumber(0, 50),
+    // dP: randomNumber(0, 50),
+    // dF: randomNumber(0, 50),
+    // dW: randomNumber(0, 50),
+    // dC: randomNumber(0, 50),
     creation: new Date().toISOString() as DateISOString,
     serverTimeInMS: getServerTimeInMS(),
   };
-  fp.d = fp.dP + fp.dF + fp.dW + fp.dC + randomNumber(0, 10);
+  // fp.d = fp.dP + fp.dF + fp.dW + fp.dC + randomNumber(0, 10);
+  fp.d = randomNumber(10, 350);
   fp.vector = Buffer.from(fp.vector).toString("base64");
   return fp;
 }
 
 /**
- * Create blackbox from fingerprint.
+ * Create blackbox from fingerprint. tra:abcd...
  *
  * @param fingerprint - Fingerprint object
  * @param request - Fingerprint request object (optional)
