@@ -33,7 +33,7 @@ async fn rocket() -> _ {
     mount_endpoints_and_merged_docs! {
         rocket, "/v1".to_owned(), settings,
         "" => (vec![], make_openapi_specs()),
-        "" => openapi_get_routes_spec![settings: routes::hello::hello],
+        "" => openapi_get_routes_spec![settings: routes::hello::hello, routes::client::get_version],
     }
 
     rocket
