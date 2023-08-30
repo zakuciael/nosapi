@@ -18,5 +18,5 @@ anyhow = "1.0.75"
 [features]
 default = []
 serde = ["dep:serde", "serde/derive"]
-schemars = ["dep:schemars"]
+json_schema = ["dep:schemars"]
 
