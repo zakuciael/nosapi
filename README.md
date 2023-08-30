@@ -15,7 +15,7 @@
 
 ## License
 
-Distributed under the Apache License 2.0. See [LICENSE](https://github.com/zakuciael/node-qtcre/blob/main/LICENSE) for
+Distributed under the Apache License 2.0. See [LICENSE](https://github.com/zakuciael/nosapi/blob/main/LICENSE) for
 more information.
 
 ## Notice of Non-Affiliation and Disclaimer
