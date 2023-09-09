@@ -1,17 +1,9 @@
+pub mod error;
+
+use crate::client::error::{Error, Result};
 use pelite::pe32::{Pe, PeFile};
-use thiserror::Error;
 
-#[derive(Error, Debug)]
-pub enum ClientVersionError {
-  #[error("Invalid file provided, expected a valid pe32 file")]
-  InvalidFile(#[from] pelite::Error),
-  #[error("No resources section found in the executable file")]
-  NoResources,
-  #[error("Unable to find version info")]
-  UnableToFindVersionInfo,
-}
-
-#[derive(PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -20,7 +12,7 @@ pub struct ClientHashes {
   pub client_gl: String,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientVersion {
@@ -31,13 +23,13 @@ pub struct ClientVersion {
 pub fn get_client_version<X: AsRef<[u8]> + ?Sized, GL: AsRef<[u8]> + ?Sized>(
   client_x: &X,
   client_gl: &GL,
-) -> Result<Option<ClientVersion>, ClientVersionError> {
+) -> Result<Option<ClientVersion>> {
   let version = PeFile::from_bytes(client_x)
-    .map_err(ClientVersionError::InvalidFile)?
+    .map_err(Error::InvalidFile)?
     .resources()
-    .map_err(|_| ClientVersionError::NoResources)?
+    .map_err(|_| Error::NoResources)?
     .version_info()
-    .map_err(|_| ClientVersionError::UnableToFindVersionInfo)?
+    .map_err(|_| Error::UnableToFindVersionInfo)?
     .fixed()
     .map(|info| info.dwProductVersion);
 
