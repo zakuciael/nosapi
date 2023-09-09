@@ -11,14 +11,20 @@ use crate::nos::NOSFileType;
 
 static OLE_TIME_CHECK: [u8; 4] = [0xEE, 0x3E, 0x32, 0x01];
 
-#[derive(Debug, PartialEq, Hash)]
+#[derive(Clone, Eq, Debug, PartialEq, Hash)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct NOSTextFile {
   pub file_count: i32,
   pub files: Vec<NOSTextFileEntry>,
   pub ole_time: Option<DateTime<Utc>>,
 }
 
-#[derive(Derivative, PartialEq, Hash)]
+#[derive(Clone, Eq, Derivative, PartialEq, Hash)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derivative(Debug)]
 pub struct NOSTextFileEntry {
   pub file_number: i32,
