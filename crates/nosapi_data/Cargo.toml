@@ -4,16 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+byteorder = "1.4.3"
+derivative = "2.2.0"
 lazy_static = "1.4.0"
 md5 = "0.7.0"
 pelite = "0.10.0"
 schemars = { version = "0.8.12", optional = true }
 serde = { version = "1.0.185", features = ["derive"], optional = true }
 thiserror = "1.0.47"
+time = { version = "0.3.28", features = ["serde"] }
 
 [dev-dependencies]
-serde_json = "1.0.105"
-anyhow = "1.0.75"
+color-eyre = "0.6.2"
+memmap = "0.7.0"
+sha1_smol = { version = "1.0.0", features = ["std"] }
+time = { version = "0.3.28", features = ["serde", "macros"] }
 
 [features]
 default = []
