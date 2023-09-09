@@ -1,0 +1,6 @@
+[workspace]
+resolver = "2"
+members = [
+    "apps/nosapi_server",
+    "crates/nosapi_data"
+]

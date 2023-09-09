@@ -8,23 +8,12 @@
 !.run/
 
 node_modules/
-coverage/
-build/
 dist/
-out/
+/target/
+*.node
 
-.tsbuildinfo
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.pnpm-error.log*
 *.log
 
 .env
 .env.*
 !.env.example
-
-.next/
-.turbo
-.vercel
