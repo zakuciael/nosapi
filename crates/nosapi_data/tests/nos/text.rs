@@ -3,7 +3,6 @@ use std::fs::File;
 use color_eyre::eyre::WrapErr;
 use memmap::Mmap;
 use sha1_smol::Sha1;
-use time::macros::datetime;
 
 use nosapi_data::exts::FromExt;
 use nosapi_data::nos::{NOSTextFile, NOSTextFileEntry};
@@ -56,7 +55,11 @@ fn correctly_parses_ole_time() {
     .wrap_err_with(|| format!("Failed to parse file {}", &FILE_PATH))
     .unwrap();
 
-  assert_eq!(file.ole_time, Some(datetime!(2023-08-23 15:27:04 UTC)));
+  assert!(file.ole_time.is_some());
+  assert_eq!(
+    file.ole_time.unwrap().to_string(),
+    "2023-08-23 15:27:04 UTC"
+  )
 }
 
 #[test]

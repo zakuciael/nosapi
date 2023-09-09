@@ -1,8 +1,8 @@
 use std::io::{Read, Seek, SeekFrom};
 
 use byteorder::{LittleEndian, ReadBytesExt};
+use chrono::{DateTime, LocalResult, TimeZone, Utc};
 use derivative::Derivative;
-use time::OffsetDateTime;
 
 use crate::exts::{FromExt, ReadExt};
 use crate::nos::decrypt::{NOSFileDecryptor, NOSTextFileDataDecryptor, NOSTextFileSimpleDecryptor};
@@ -15,7 +15,7 @@ static OLE_TIME_CHECK: [u8; 4] = [0xEE, 0x3E, 0x32, 0x01];
 pub struct NOSTextFile {
   pub file_count: i32,
   pub files: Vec<NOSTextFileEntry>,
-  pub ole_time: Option<OffsetDateTime>,
+  pub ole_time: Option<DateTime<Utc>>,
 }
 
 #[derive(Derivative, PartialEq, Hash)]
@@ -55,13 +55,16 @@ impl FromExt for NOSTextFile {
 
     let mut ole_time = [0u8; 12];
     let ole_time = if reader.read(&mut ole_time)? == 12 && ole_time[8..12] == OLE_TIME_CHECK {
-      let mut buf: [u8; 8] = [0u8; 8];
-      buf.copy_from_slice(&ole_time[0..8]);
+      let variant = &ole_time[0..8]
+        .try_into()
+        .map(f64::from_le_bytes)
+        .map_err(|_| Error::InvalidOLETime)?;
+      let unix_timestamp = (-2208988800f64 + ((variant - 2.00001) * 86400f64)) as i64;
 
-      let variant = f64::from_le_bytes(buf);
-      let unix_time = (-2208988800f64 + ((variant - 2.00001) * 86400f64)) as i64;
-
-      Some(OffsetDateTime::from_unix_timestamp(unix_time)?)
+      match Utc.timestamp_opt(unix_timestamp, 0) {
+        LocalResult::Single(v) => Some(v),
+        _ => Err(Error::InvalidOLETime)?,
+      }
     } else {
       None
     };

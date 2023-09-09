@@ -15,7 +15,7 @@ pub enum Error {
     received: NOSFileType,
   },
   #[error("Invalid OLE time detected")]
-  InvalidOLETime(#[from] time::error::ComponentRange),
+  InvalidOLETime,
   #[error("Unable to read the file due to an IO error")]
   IO(#[from] std::io::Error),
 }
