@@ -38,6 +38,8 @@ jobs:
           toolchain: stable
           override: true
           components: clippy
+      - name: Cache project dependencies
+        uses: Swatinem/rust-cache@v2
       - name: Run clippy
         uses: actions-rs/clippy-check@v1
         with:
@@ -60,6 +62,8 @@ jobs:
         with:
           toolchain: stable
           override: true
+      - name: Cache project dependencies
+        uses: Swatinem/rust-cache@v2
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
