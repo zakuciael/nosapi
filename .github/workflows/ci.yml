@@ -22,8 +22,6 @@ jobs:
           components: rustfmt
       - name: Run rustfmt
         uses: actions-rust-lang/rustfmt@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
   lint:
     name: Lint
     runs-on: ubuntu-latest
