@@ -21,7 +21,7 @@ jobs:
           toolchain: stable
           components: rustfmt
       - name: Run rustfmt
-        uses: Syndelis/rustfmt-action@v1
+        uses: Syndelis/rustfmt-action
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
   lint:
