@@ -6,4 +6,5 @@ members = [
 ]
 
 [workspace.package]
+edition = "2021"
 authors = ["Krzysztof Saczuk <me@krzysztofsaczuk.pl>"]
