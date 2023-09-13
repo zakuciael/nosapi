@@ -1,0 +1,22 @@
+{
+  "gitSiteUrl": "https://github.com/zakuciael/nosapi/",
+  "pkgManagers": {
+    "rust": {
+      "version": true,
+      "getPublishedVersion": "cargo search ${ pkg.pkg } --limit 1 | sed -nE 's/^[^\"]*\"//; s/\".*//1p' -",
+      "publish": [
+        "cargo publish"
+      ]
+    }
+  },
+  "packages": {
+    "nosapi_server": {
+      "path": "./apps/nosapi_server",
+      "manager": "rust"
+    },
+    "nosapi_data": {
+      "path": "./crates/nosapi_data",
+      "manager": "rust"
+    }
+  }
+}
