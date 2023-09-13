@@ -12,19 +12,34 @@ concurrency:
 
 jobs:
   release:
-    name: Prepare / Publish a release
     runs-on: ubuntu-latest
+    outputs:
+      change: ${{ steps.covector.outputs.change }}
+      commandRan: ${{ steps.covector.outputs.commandRan }}
+      successfulPublish: ${{ steps.covector.outputs.successfulPublish }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Install rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
-      - name: Run release-plz
-        uses: MarcoIeni/release-plz-action@v0.5
+      - name: Setup git config
+        run: |
+          git config --global user.name "${{ github.event.pusher.name }}"
+          git config --global user.email "${{ github.event.pusher.email }}"
+      - name: Run covector version or publish
+        uses: jbolda/covector/packages/action@covector-v0.10
+        id: covector
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          command: 'version-or-publish'
+          createRelease: true
+      - name: Create Pull Request with versions bumped
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        if: steps.covector.outputs.commandRan == 'version'
+        with:
+          title: "chore: release"
+          commit-message: "chore: release"
+          branch: "release"
+          body: ${{ steps.covector.outputs.change }}
