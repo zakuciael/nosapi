@@ -1,6 +1,5 @@
 use nosapi_data::nos::error::NOSFileHeaderError;
 use nosapi_data::nos::{NOSDataType, NOSFileType};
-use nosapi_data::prelude::*;
 
 #[test]
 fn handles_invalid_header_size() {

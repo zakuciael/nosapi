@@ -6,7 +6,6 @@ use sha1_smol::Sha1;
 
 use nosapi_data::nos::error::NOSFileError;
 use nosapi_data::nos::{NOSTextFile, NOSTextFileEntry};
-use nosapi_data::prelude::*;
 
 static FILE_PATH: &str = "./tests/fixtures/NSgtdData.NOS";
 static LST_FILE_SHA1: &str = "da39a3ee5e6b4b0d3255bfef95601890afd80709";

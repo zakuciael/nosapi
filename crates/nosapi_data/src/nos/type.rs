@@ -1,7 +1,6 @@
 use std::io::{Read, Seek};
 
 use crate::nos::error::NOSFileHeaderError;
-use crate::traits::FileParser;
 
 static DATA_FILE_HEADER: [&str; 3] = ["NT Data", "32GBS V1.0", "ITEMS V1.0"];
 static CCINF_FILE_HEADER: &str = "CCINF V1.20";
@@ -13,13 +12,8 @@ pub enum NOSFileType {
   CCInf,
 }
 
-impl FileParser for NOSFileType {
-  type Error = NOSFileHeaderError;
-
-  fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self, Self::Error>
-  where
-    Self: Sized,
-  {
+impl NOSFileType {
+  pub fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self, NOSFileHeaderError> {
     let bytes = bytes.as_ref();
 
     if bytes.len() != 0x0B {
@@ -42,10 +36,7 @@ impl FileParser for NOSFileType {
     })
   }
 
-  fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, Self::Error>
-  where
-    Self: Sized,
-  {
+  pub fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, NOSFileHeaderError> {
     let mut buf = [0u8; 0x0B];
     reader
       .read_exact(&mut buf)
