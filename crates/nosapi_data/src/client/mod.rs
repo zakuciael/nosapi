@@ -1,7 +1,8 @@
-pub mod error;
-
-use crate::client::error::{Error, Result};
 use pelite::pe32::{Pe, PeFile};
+
+use crate::client::error::ClientVersionError;
+
+pub mod error;
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -23,13 +24,13 @@ pub struct ClientVersion {
 pub fn get_client_version<X: AsRef<[u8]> + ?Sized, GL: AsRef<[u8]> + ?Sized>(
   client_x: &X,
   client_gl: &GL,
-) -> Result<Option<ClientVersion>> {
+) -> Result<Option<ClientVersion>, ClientVersionError> {
   let version = PeFile::from_bytes(client_x)
-    .map_err(Error::InvalidFile)?
+    .map_err(ClientVersionError::InvalidFile)?
     .resources()
-    .map_err(|_| Error::NoResources)?
+    .map_err(|_| ClientVersionError::NoResources)?
     .version_info()
-    .map_err(|_| Error::UnableToFindVersionInfo)?
+    .map_err(|_| ClientVersionError::UnableToFindVersionInfo)?
     .fixed()
     .map(|info| info.dwProductVersion);
 

@@ -1,5 +1,5 @@
 #[derive(thiserror::Error, Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub enum Error {
+pub enum ClientVersionError {
   #[error("Invalid file provided, expected a valid pe32 file")]
   InvalidFile(#[from] pelite::Error),
   #[error("No resources section found in the executable file")]
@@ -7,5 +7,3 @@ pub enum Error {
   #[error("Unable to find version info")]
   UnableToFindVersionInfo,
 }
-
-pub type Result<T> = core::result::Result<T, Error>;

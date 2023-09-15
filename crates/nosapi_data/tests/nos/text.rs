@@ -5,6 +5,7 @@ use memmap::Mmap;
 use sha1_smol::Sha1;
 
 use nosapi_data::exts::FromExt;
+use nosapi_data::nos::error::NOSFileError;
 use nosapi_data::nos::{NOSTextFile, NOSTextFileEntry};
 
 static FILE_PATH: &str = "./tests/fixtures/NSgtdData.NOS";
@@ -43,7 +44,7 @@ static DAT_FILE_SHA1_LIST: [(&str, &str); 28] = [
   ("c31395ba4ce16658ee5c6b3e40c948da049c2a92", "hk_abuse.lst"),
 ];
 
-fn load_file(path: &str) -> nosapi_data::nos::error::Result<NOSTextFile> {
+fn load_file(path: &str) -> Result<NOSTextFile, NOSFileError> {
   let file = File::open(path)?;
   let mmap = unsafe { Mmap::map(&file)? };
   NOSTextFile::from_bytes(&mmap)

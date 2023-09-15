@@ -1,8 +1,7 @@
 use std::io::{Read, Seek};
 
-use crate::ensure;
 use crate::exts::FromExt;
-use crate::nos::error::{CustomError, Error, Result};
+use crate::nos::error::NOSFileHeaderError;
 
 static DATA_FILE_HEADER: [&str; 3] = ["NT Data", "32GBS V1.0", "ITEMS V1.0"];
 static CCINF_FILE_HEADER: &str = "CCINF V1.20";
@@ -15,21 +14,22 @@ pub enum NOSFileType {
 }
 
 impl FromExt for NOSFileType {
-  type Error = Error;
+  type Error = NOSFileHeaderError;
 
-  fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self>
+  fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self, Self::Error>
   where
     Self: Sized,
   {
-    ensure!(
-      bytes.as_ref().len() == 0x0B,
-      Error::InvalidFileHeader(CustomError::new(format!(
+    let bytes = bytes.as_ref();
+
+    if bytes.len() != 0x0B {
+      return Err(NOSFileHeaderError(format!(
         "File header has invalid size, expected 0x0B got {:#04X}",
         bytes.as_ref().len()
-      )))
-    );
+      )));
+    }
 
-    let header = String::from_utf8_lossy(bytes.as_ref());
+    let header = String::from_utf8_lossy(bytes);
     Ok(match header {
       _ if &header[0..7] == DATA_FILE_HEADER[0]
         || &header[0..10] == DATA_FILE_HEADER[1]
@@ -42,12 +42,14 @@ impl FromExt for NOSFileType {
     })
   }
 
-  fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self>
+  fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, Self::Error>
   where
     Self: Sized,
   {
     let mut buf = [0u8; 0x0B];
-    reader.read_exact(&mut buf)?;
+    reader
+      .read_exact(&mut buf)
+      .map_err(|_| NOSFileHeaderError("Failed to read the header".to_string()))?;
 
     Self::from_bytes(&buf)
   }
@@ -82,13 +84,11 @@ pub enum NOSDataType {
 }
 
 impl NOSDataType {
-  pub fn from_header(header: &str) -> Result<Option<Self>> {
+  pub fn from_header(header: &str) -> Result<Option<Self>, NOSFileHeaderError> {
     match header {
       _ if &header[0..7] == DATA_FILE_HEADER[0] => {
         let raw: usize = header[8..10].parse::<usize>().map_err(|_| {
-          Error::InvalidFileHeader(CustomError::new(
-            "File header doesn't contain an valid type number".to_string(),
-          ))
+          NOSFileHeaderError("File header doesn't contain an valid type number".to_string())
         })?;
 
         Ok(Self::from_raw(raw))

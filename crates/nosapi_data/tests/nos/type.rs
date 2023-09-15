@@ -1,12 +1,10 @@
 use nosapi_data::exts::FromExt;
-use nosapi_data::nos::error::Error;
+use nosapi_data::nos::error::NOSFileHeaderError;
 use nosapi_data::nos::{NOSDataType, NOSFileType};
 
 #[test]
 fn handles_invalid_header_size() {
-  assert!(
-    NOSFileType::from_bytes(&[0u8; 0xA]).is_err_and(|e| matches!(e, Error::InvalidFileHeader(_)))
-  )
+  assert!(NOSFileType::from_bytes(&[0u8; 0xA]).is_err_and(|e| matches!(e, NOSFileHeaderError(_))))
 }
 
 #[test]
