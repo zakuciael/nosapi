@@ -4,10 +4,10 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use chrono::{DateTime, TimeZone, Utc};
 use derivative::Derivative;
 
-use crate::exts::{FromExt, ReadExt};
 use crate::nos::decrypt::{NOSFileDecryptor, NOSTextFileDataDecryptor, NOSTextFileSimpleDecryptor};
 use crate::nos::error::NOSFileError;
 use crate::nos::NOSFileType;
+use crate::traits::{FileParser, ReadExt};
 
 static OLE_TIME_CHECK: [u8; 4] = [0xEE, 0x3E, 0x32, 0x01];
 
@@ -35,7 +35,7 @@ pub struct NOSTextFileEntry {
   pub raw_content: Vec<u8>,
 }
 
-impl FromExt for NOSTextFile {
+impl FileParser for NOSTextFile {
   type Error = NOSFileError;
 
   fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, Self::Error>
@@ -81,7 +81,7 @@ impl FromExt for NOSTextFile {
   }
 }
 
-impl FromExt for NOSTextFileEntry {
+impl FileParser for NOSTextFileEntry {
   type Error = NOSFileError;
 
   fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, Self::Error>
