@@ -1,7 +1,7 @@
 use std::io::{Read, Seek};
 
-use crate::exts::FromExt;
 use crate::nos::error::NOSFileHeaderError;
+use crate::traits::FileParser;
 
 static DATA_FILE_HEADER: [&str; 3] = ["NT Data", "32GBS V1.0", "ITEMS V1.0"];
 static CCINF_FILE_HEADER: &str = "CCINF V1.20";
@@ -13,7 +13,7 @@ pub enum NOSFileType {
   CCInf,
 }
 
-impl FromExt for NOSFileType {
+impl FileParser for NOSFileType {
   type Error = NOSFileHeaderError;
 
   fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self, Self::Error>
