@@ -1,4 +1,3 @@
-
 use pelite::pe32::{Pe, PeFile};
 
 use crate::client::error::ClientVersionError;
