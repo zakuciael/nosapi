@@ -1,4 +1,4 @@
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Cursor, Read, Seek, SeekFrom};
 
 use byteorder::{LittleEndian, ReadBytesExt};
 use chrono::{DateTime, TimeZone, Utc};
@@ -7,7 +7,7 @@ use derivative::Derivative;
 use crate::nos::decrypt::{NOSFileDecryptor, NOSTextFileDataDecryptor, NOSTextFileSimpleDecryptor};
 use crate::nos::error::NOSFileError;
 use crate::nos::NOSFileType;
-use crate::traits::{FileParser, ReadExt};
+use crate::traits::ReadExt;
 
 static OLE_TIME_CHECK: [u8; 4] = [0xEE, 0x3E, 0x32, 0x01];
 
@@ -35,13 +35,12 @@ pub struct NOSTextFileEntry {
   pub raw_content: Vec<u8>,
 }
 
-impl FileParser for NOSTextFile {
-  type Error = NOSFileError;
+impl NOSTextFile {
+  pub fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self, NOSFileError> {
+    Self::from_reader(&mut Cursor::new(bytes.as_ref()))
+  }
 
-  fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, Self::Error>
-  where
-    Self: Sized,
-  {
+  fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, NOSFileError> {
     let file_type = NOSFileType::from_reader(reader)?;
 
     if file_type != NOSFileType::Text {
@@ -81,13 +80,12 @@ impl FileParser for NOSTextFile {
   }
 }
 
-impl FileParser for NOSTextFileEntry {
-  type Error = NOSFileError;
+impl NOSTextFileEntry {
+  pub fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self, NOSFileError> {
+    Self::from_reader(&mut Cursor::new(bytes.as_ref()))
+  }
 
-  fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, Self::Error>
-  where
-    Self: Sized,
-  {
+  pub fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, NOSFileError> {
     let file_number = reader.read_i32::<LittleEndian>()?;
     let name_size = reader.read_i32::<LittleEndian>()? as usize;
     let name = reader.read_to_utf8_sized(name_size)?;
