@@ -1,8 +1,14 @@
 [package]
 name = "nosapi_data"
 version = "0.1.0"
+description = "Library for parsing NosTale's .NOS files."
 edition.workspace = true
 authors.workspace = true
+readme = "README.md"
+repository = "https://github.com/zakuciael/nosapi/tree/main/crates/nosapi_data"
+license = "Apache-2.0"
+keywords = ["nostale", "nos", "nos-file", "parser", "nosapi"]
+categories = ["parsing"]
 
 [dependencies]
 byteorder = "1.4.3"
