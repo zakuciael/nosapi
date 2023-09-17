@@ -1,3 +1,5 @@
+//! Contains traits used inside this crate
+
 use std::io;
 use std::io::Read;
 

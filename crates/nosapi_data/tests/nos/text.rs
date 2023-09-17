@@ -1,7 +1,7 @@
 use std::fs::File;
 
 use color_eyre::eyre::WrapErr;
-use memmap::Mmap;
+use memmap2::Mmap;
 use sha1_smol::Sha1;
 
 use nosapi_data::nos::error::NOSFileError;
@@ -55,9 +55,9 @@ fn correctly_parses_ole_time() {
     .wrap_err_with(|| format!("Failed to parse file {}", &FILE_PATH))
     .unwrap();
 
-  assert!(file.ole_time.is_some());
+  assert!(file.last_modified_date.is_some());
   assert_eq!(
-    file.ole_time.unwrap().to_string(),
+    file.last_modified_date.unwrap().to_string(),
     "2023-08-23 15:27:04 UTC"
   )
 }
@@ -79,7 +79,7 @@ fn correctly_parses_entry_metadata() {
       name: "kr_abuse.lst".to_owned(),
       is_dat: false,
       size: 0,
-      raw_content: vec![]
+      raw_content: vec![],
     }
   )
 }
