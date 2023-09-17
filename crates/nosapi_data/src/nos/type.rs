@@ -5,6 +5,7 @@ use crate::nos::error::NOSFileHeaderError;
 static DATA_FILE_HEADER: [&str; 3] = ["NT Data", "32GBS V1.0", "ITEMS V1.0"];
 static CCINF_FILE_HEADER: &str = "CCINF V1.20";
 
+/// Represents a file type of the `.NOS` file
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub enum NOSFileType {
   Data(Option<NOSDataType>),
@@ -13,6 +14,10 @@ pub enum NOSFileType {
 }
 
 impl NOSFileType {
+  /// Resolves a file type from a byte slice
+  ///
+  /// # Errors
+  /// This method can return an error if the specified byte slice has an invalid length
   pub fn from_bytes<T: AsRef<[u8]> + ?Sized>(bytes: &T) -> Result<Self, NOSFileHeaderError> {
     let bytes = bytes.as_ref();
 
@@ -36,6 +41,11 @@ impl NOSFileType {
     })
   }
 
+  /// Resolves a file type from a reader
+  ///
+  /// # Errors
+  /// This method can return an error
+  /// if it failed to read the bytes required to resolve the file type
   pub fn from_reader<T: Read + Seek>(reader: &mut T) -> Result<Self, NOSFileHeaderError> {
     let mut buf = [0u8; 0x0B];
     reader
@@ -46,6 +56,7 @@ impl NOSFileType {
   }
 }
 
+/// Represents a type of data file (available only if the file type is [NOSFileType::Data])
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 #[repr(usize)]
 pub enum NOSDataType {
@@ -75,6 +86,11 @@ pub enum NOSDataType {
 }
 
 impl NOSDataType {
+  /// Resolves a data type from a file header string
+  ///
+  /// # Errors
+  /// This method can return an error
+  /// if the header string doesn't contain a valid [usize] integer at the end of it
   pub fn from_header(header: &str) -> Result<Option<Self>, NOSFileHeaderError> {
     match header {
       _ if &header[0..7] == DATA_FILE_HEADER[0] => {
@@ -90,6 +106,7 @@ impl NOSDataType {
     }
   }
 
+  /// Resolves a data type from a [usize] integer
   pub fn from_raw(raw: usize) -> Option<Self> {
     match raw {
       _ if raw == Self::PCHPKG as usize => Some(Self::PCHPKG),
