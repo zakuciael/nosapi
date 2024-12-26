@@ -33,12 +33,6 @@ impl Vector {
   }
 }
 
-impl Display for Vector {
-  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    write!(f, "{} {}", self.data, self.time.timestamp_millis())
-  }
-}
-
 impl PartialEq for Vector {
   fn eq(&self, other: &Self) -> bool {
     self.data.eq(&other.data)
