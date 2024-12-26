@@ -1,0 +1,17 @@
+[package]
+name = "nosapi_blackbox"
+version = "1.0.0"
+description = "A library for working with Gameforge's auth fingerprint/blackbox"
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+base64 = "0.22.1"
+bon = "3.3.1"
+chrono = { version = "0.4.39", features = ["serde", "now"] }
+rand = { version = "0.8.5", features = ["serde"] }
+serde = { version = "1.0.216", features = ["derive"] }
+serde_plain = "1.0.2"
+
+[dev-dependencies]
+rstest = "0.23.0"
