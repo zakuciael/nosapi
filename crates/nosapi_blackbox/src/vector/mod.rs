@@ -2,9 +2,9 @@ mod de;
 mod ser;
 
 use crate::utils;
+use crate::utils::generate_vector_data;
 use bon::Builder;
 use chrono::{DateTime, TimeDelta, Utc};
-use std::fmt::Display;
 use std::ops::Add;
 
 #[derive(Builder, Clone, Debug)]
@@ -40,6 +40,15 @@ impl PartialEq for Vector {
         .time
         .timestamp_millis()
         .eq(&other.time.timestamp_millis())
+  }
+}
+
+impl Default for Vector {
+  fn default() -> Self {
+    Self {
+      data: generate_vector_data(),
+      time: Utc::now(),
+    }
   }
 }
 
