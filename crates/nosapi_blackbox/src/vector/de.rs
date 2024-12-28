@@ -1,14 +1,14 @@
-use super::Vector;
+use super::VectorString;
 use base64::Engine;
 use chrono::{DateTime, Utc};
 use serde::de::{Error, Unexpected, Visitor};
 use serde::{Deserialize, Deserializer};
 
-struct VectorVisitor;
+struct VectorStringVisitor;
 
 #[allow(clippy::needless_lifetimes)]
-impl<'de> Visitor<'de> for VectorVisitor {
-  type Value = Vector;
+impl<'de> Visitor<'de> for VectorStringVisitor {
+  type Value = VectorString;
 
   fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
     write!(f, "vector string")
@@ -46,15 +46,15 @@ impl<'de> Visitor<'de> for VectorVisitor {
       ))?
     };
 
-    Ok(Vector::new(data, time))
+    Ok(VectorString::new(data, time))
   }
 }
 
-impl<'de> Deserialize<'de> for Vector {
+impl<'de> Deserialize<'de> for VectorString {
   fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
   where
     D: Deserializer<'de>,
   {
-    deserializer.deserialize_str(VectorVisitor)
+    deserializer.deserialize_str(VectorStringVisitor)
   }
 }

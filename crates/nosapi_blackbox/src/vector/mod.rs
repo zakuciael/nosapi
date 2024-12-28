@@ -8,14 +8,14 @@ use chrono::{DateTime, TimeDelta, Utc};
 use std::ops::Add;
 
 #[derive(Builder, Clone, Debug)]
-pub struct Vector {
-  #[builder(default = utils::generate_vector_data())]
+pub struct VectorString {
+  #[builder(default = utils::generate_vector_string())]
   data: String,
   #[builder(default = chrono::Utc::now())]
   time: DateTime<Utc>,
 }
 
-impl Vector {
+impl VectorString {
   pub fn new(data: String, time: DateTime<Utc>) -> Self {
     Self { data, time }
   }
@@ -33,7 +33,7 @@ impl Vector {
   }
 }
 
-impl PartialEq for Vector {
+impl PartialEq for VectorString {
   fn eq(&self, other: &Self) -> bool {
     self.data.eq(&other.data)
       && self
@@ -43,7 +43,7 @@ impl PartialEq for Vector {
   }
 }
 
-impl Default for Vector {
+impl Default for VectorString {
   fn default() -> Self {
     Self {
       data: generate_vector_data(),
@@ -54,13 +54,13 @@ impl Default for Vector {
 
 #[cfg(test)]
 mod tests {
-  use crate::vector::Vector;
+  use crate::vector::VectorString;
   use chrono::{DateTime, Utc};
   use serde::de::{Error, Unexpected};
 
   #[rstest::fixture]
-  fn vector_inst() -> Vector {
-    Vector::new(
+  fn vector_inst() -> VectorString {
+    VectorString::new(
       "ZZUCXxH2g0NCAg4Iwo0g5dP2XjE05TCj".to_string(),
       DateTime::<Utc>::from_timestamp_millis(1735170917000).unwrap(),
     )
@@ -72,7 +72,7 @@ mod tests {
   }
 
   #[rstest::rstest]
-  fn should_correctly_serialize(vector_inst: Vector, vector_str: &'static str) {
+  fn should_correctly_serialize(vector_inst: VectorString, vector_str: &'static str) {
     let res = serde_plain::to_string(&vector_inst);
 
     assert!(res.is_ok());
@@ -80,8 +80,8 @@ mod tests {
   }
 
   #[rstest::rstest]
-  fn should_correctly_deserialize(vector_inst: Vector, vector_str: &'static str) {
-    let res = serde_plain::from_str::<Vector>(vector_str);
+  fn should_correctly_deserialize(vector_inst: VectorString, vector_str: &'static str) {
+    let res = serde_plain::from_str::<VectorString>(vector_str);
 
     assert!(res.is_ok());
     assert_eq!(res.unwrap(), vector_inst)
@@ -96,7 +96,7 @@ mod tests {
     #[case] input: &'static str,
     #[case] expected: serde_plain::Error,
   ) {
-    let res = serde_plain::from_str::<Vector>(input);
+    let res = serde_plain::from_str::<VectorString>(input);
 
     assert!(res.is_err());
     assert_eq!(&res.unwrap_err().to_string(), &expected.to_string())

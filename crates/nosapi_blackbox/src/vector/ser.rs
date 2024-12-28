@@ -1,8 +1,8 @@
-use super::Vector;
+use super::VectorString;
 use base64::Engine;
 use serde::{Serialize, Serializer};
 
-impl Serialize for Vector {
+impl Serialize for VectorString {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: Serializer,
