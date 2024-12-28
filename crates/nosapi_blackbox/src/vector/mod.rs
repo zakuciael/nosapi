@@ -8,7 +8,7 @@ use chrono::{DateTime, TimeDelta, Utc};
 use std::fmt::{Display, Formatter};
 use std::ops::Add;
 
-#[derive(Builder, Clone, Debug)]
+#[derive(Builder, Clone, PartialOrd, Debug)]
 pub struct VectorString {
   #[builder(default = utils::generate_vector_string())]
   data: String,
