@@ -7,9 +7,6 @@ impl Serialize for VectorString {
   where
     S: Serializer,
   {
-    let str = format!("{} {}", self.data, self.time.timestamp_millis());
-    let encoded = base64::engine::general_purpose::STANDARD.encode(&str);
-
-    serializer.serialize_str(&encoded)
+    serializer.serialize_str(&base64::engine::general_purpose::STANDARD.encode(&self.to_string()))
   }
 }

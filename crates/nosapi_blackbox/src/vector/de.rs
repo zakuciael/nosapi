@@ -11,7 +11,7 @@ impl<'de> Visitor<'de> for VectorStringVisitor {
   type Value = VectorString;
 
   fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    write!(f, "vector string")
+    write!(f, "a vector string")
   }
 
   fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>

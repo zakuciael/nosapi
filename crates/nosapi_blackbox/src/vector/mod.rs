@@ -5,6 +5,7 @@ use crate::utils;
 use crate::utils::generate_vector_string;
 use bon::Builder;
 use chrono::{DateTime, TimeDelta, Utc};
+use std::fmt::{Display, Formatter};
 use std::ops::Add;
 
 #[derive(Builder, Clone, Debug)]
@@ -40,6 +41,12 @@ impl PartialEq for VectorString {
         .time
         .timestamp_millis()
         .eq(&other.time.timestamp_millis())
+  }
+}
+
+impl Display for VectorString {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{} {}", self.data, self.time.timestamp_millis())
   }
 }
 
