@@ -2,7 +2,7 @@ mod de;
 mod ser;
 
 use crate::utils;
-use crate::utils::generate_vector_data;
+use crate::utils::generate_vector_string;
 use bon::Builder;
 use chrono::{DateTime, TimeDelta, Utc};
 use std::ops::Add;
@@ -46,7 +46,7 @@ impl PartialEq for VectorString {
 impl Default for VectorString {
   fn default() -> Self {
     Self {
-      data: generate_vector_data(),
+      data: generate_vector_string(),
       time: Utc::now(),
     }
   }
