@@ -2,8 +2,10 @@ use crate::vector::VectorString;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_tuple::{DeserializeTuple, SerializeTuple};
+use serde_with::base64::{Base64, Standard};
+use serde_with::serde_as;
 
-#[derive(Serialize, Deserialize, Clone, PartialOrd, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Request {
   features: Vec<u64>,
   #[serde(rename = "installation")]
@@ -11,9 +13,8 @@ pub struct Request {
   session: String,
 }
 
-#[derive(
-  Serialize, SerializeTuple, Deserialize, DeserializeTuple, Clone, PartialOrd, PartialEq, Debug,
-)]
+#[serde_as]
+#[derive(Serialize, SerializeTuple, Deserialize, DeserializeTuple, Clone, PartialEq, Debug)]
 pub struct Fingerprint {
   pub version: u32,
   pub timezone: String,
@@ -43,6 +44,7 @@ pub struct Fingerprint {
   pub game: String,
   pub delta: u32,
   pub os_version: Option<String>,
+  #[serde_as(as = "Base64<Standard>")]
   pub vector: VectorString,
   pub user_agent: String,
   pub server_time: DateTime<Utc>,
@@ -53,10 +55,13 @@ pub struct Fingerprint {
 #[cfg(test)]
 mod tests {
   use crate::fingerprint::Fingerprint;
+  use crate::vector::VectorString;
+  use chrono::DateTime;
   use serde_tuple::{DeserializeTuple, SerializeTuple};
   use std::str::FromStr;
 
   #[rstest::fixture]
+  //noinspection DuplicatedCode, SpellCheckingInspection
   fn fingerprint_inst() -> Fingerprint {
     Fingerprint {
       version: 9,
@@ -87,7 +92,10 @@ mod tests {
       game: "0r397uz4k9n42y0lsaeco3v0utr".to_string(),
       delta: 320,
       os_version: None,
-      vector: serde_plain::from_str("am5pWUV1SXNyeSA1W3ksOXdTK3RLXkMnZ19gdEZtVVRIWXd8QXVRfElQOCZaQWw3dUE3VHhGX2IuTHY4YXtpX0wvRU8/IGM8S1lLUkMxcD9zUGs4byR7WXw7Pi05PHFPJzluNyAxNzM1MzkwNTc1MzI4").unwrap(),
+      vector: VectorString::new(
+        "jniYEuIsry 5[y,9wS+tK^C'g_`tFmUTHYw|AuQ|IP8&ZAl7uA7TxF_b.Lv8a{i_L/EO? c<KYKRC1p?sPk8o${Y|;>-9<qO'9n7".to_string(),
+        DateTime::from_timestamp_millis(1735390575328).unwrap()
+      ),
       user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36".to_string(),
       server_time: FromStr::from_str("2024-12-28T12:56:15.000Z").unwrap(),
       request: None,

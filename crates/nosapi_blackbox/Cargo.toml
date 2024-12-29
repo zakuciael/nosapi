@@ -14,6 +14,7 @@ serde = { version = "1.0.216", features = ["derive"] }
 serde_json = "1.0.134"
 serde_plain = "1.0.2"
 serde_tuple = { version = "1.1.0", git = "https://github.com/zakuciael/serde_tuple" }
+serde_with = { version = "3.12.0", features = ["base64"] }
 
 [dev-dependencies]
 rstest = "0.23.0"
