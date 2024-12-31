@@ -16,11 +16,11 @@ fn rng_generator() -> impl Rng {
   return rand::thread_rng();
 }
 
-pub(crate) fn random_ascii_char() -> char {
+pub fn random_ascii_char() -> char {
   random_ascii_generator().sample(&mut rng_generator()).into()
 }
 
-pub(crate) fn random_ascii_string(length: usize) -> String {
+pub fn random_ascii_string(length: usize) -> String {
   random_ascii_generator()
     .sample_iter(&mut rng_generator())
     .take(length)
