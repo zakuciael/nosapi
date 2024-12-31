@@ -16,6 +16,8 @@ serde_plain = "1.0.2"
 serde_tuple = { version = "1.1.0", git = "https://github.com/zakuciael/serde_tuple" }
 serde_with = { version = "3.12.0", features = ["base64"] }
 percent-encoding = "2.3.1"
+sha2 = "0.10.8"
+thiserror = "2.0.9"
 
 [dev-dependencies]
 rstest = "0.23.0"
