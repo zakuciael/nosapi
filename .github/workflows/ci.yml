@@ -5,8 +5,25 @@ on:
     branches: [ main ]
   pull_request:
 jobs:
+  flake:
+    name: nix flake check
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: install nix
+        uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ github.token }}
+      - name: nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+      - name: check flake.lock
+        uses: DeterminateSystems/flake-checker-action@v9
+      - name: nix flake check
+        run: nix flake check --all-systems
   dependencies:
     name: cargo build | dependencies
+    needs: flake
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -76,17 +93,3 @@ jobs:
           shared-key: ci
       - name: cargo test
         run: nix develop --command cargo test --workspace -- --nocapture
-  flake:
-    name: nix flake check
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-      - name: install nix
-        uses: cachix/install-nix-action@v30
-        with:
-          github_access_token: ${{ github.token }}
-      - name: check flake.lock
-        uses: DeterminateSystems/flake-checker-action@v9
-      - name: nix flake check
-        run: nix flake check --all-systems
