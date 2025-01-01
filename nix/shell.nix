@@ -4,6 +4,7 @@
   callPackage,
   nixd,
   nixfmt-rfc-style,
+  treefmt,
   knope ? (callPackage ./tools/knope.nix { inherit crane; }),
   cargo-wrapper ? (callPackage ./tools/cargo-wrapper.nix { inherit (crane) cargo; }),
 }:
@@ -14,6 +15,8 @@ let
 in
 crane.devShell {
   name = "nosapi";
+
+  inputsFrom = [ treefmt ];
 
   packages = [
     knope

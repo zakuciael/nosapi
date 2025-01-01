@@ -2,7 +2,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
 concurrency:
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  flake:
+  check:
     name: nix flake check
     runs-on: ubuntu-latest
     steps:
@@ -25,76 +25,4 @@ jobs:
       - name: check flake.lock
         uses: DeterminateSystems/flake-checker-action@v9
       - name: nix flake check
-        run: nix flake check --all-systems
-  dependencies:
-    name: cargo build | dependencies
-    needs: flake
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-      - name: install nix
-        uses: cachix/install-nix-action@v30
-        with:
-          github_access_token: ${{ github.token }}
-      - name: rust problem matcher
-        run: echo "::add-matcher::./.github/matcher.json"
-      - name: nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
-      - name: rust cache
-        id: cargo-cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: ci
-      - name: cargo build | dependencies
-        if: steps.cargo-cache.outputs.cache-hit != 'true'
-        run: nix develop --command cargo build --workspace
-      - name: cargo build | dev dependencies
-        if: steps.cargo-cache.outputs.cache-hit != 'true'
-        run: nix develop --command cargo test --workspace --no-run
-  clippy:
-    name: cargo clippy
-    needs: dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-      - name: install nix
-        uses: cachix/install-nix-action@v30
-        with:
-          github_access_token: ${{ github.token }}
-      - name: rust problem matcher
-        run: echo "::add-matcher::./.github/matcher.json"
-      - name: nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
-      - name: rust cache
-        id: cargo-cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: ci
-      - name: cargo clippy
-        run: nix develop --command cargo clippy --workspace
-      - name: cargo fmt
-        run: nix develop --command cargo fmt --all --check
-  test:
-    name: cargo test
-    needs: dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-      - name: install nix
-        uses: cachix/install-nix-action@v30
-        with:
-          github_access_token: ${{ github.token }}
-      - name: rust problem matcher
-        run: echo "::add-matcher::./.github/matcher.json"
-      - name: nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
-      - name: rust cache
-        id: cargo-cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: ci
-      - name: cargo test
-        run: nix develop --command cargo test --workspace -- --nocapture
+        run: nix flake check --all-systems --print-build-logs
