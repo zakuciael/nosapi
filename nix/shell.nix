@@ -3,7 +3,7 @@
   crane,
   callPackage,
   nixd,
-  nixfmt,
+  nixfmt-rfc-style,
   knope ? (callPackage ./tools/knope.nix { inherit crane; }),
   cargo-wrapper ? (callPackage ./tools/cargo-wrapper.nix { inherit (crane) cargo; }),
 }:
@@ -18,16 +18,15 @@ crane.devShell {
   packages = [
     knope
     nixd
-    nixfmt
+    nixfmt-rfc-style
     wrappedToolchain
   ];
 
-  shellHook = # bash
-    ''
-      if [ -d .direnv/ ]; then
-        rm -rf .direnv/links
-        mkdir -p .direnv/links/
-        ln -sf "${wrappedToolchain}" .direnv/links/rust
-      fi
-    '';
+  shellHook = ''
+    if [ -d .direnv/ ]; then
+      rm -rf .direnv/links
+      mkdir -p .direnv/links/
+      ln -sf "${wrappedToolchain}" .direnv/links/rust
+    fi
+  '';
 }

@@ -20,14 +20,12 @@
       url = "github:nix-community/fenix";
       inputs.rust-analyzer-src.follows = "";
     };
-    nixfmt.url = "github:NixOS/nixfmt";
   };
 
   outputs =
     { flake-parts, ... }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
-      debug = true;
 
       perSystem =
         {
@@ -35,12 +33,10 @@
           inputs',
           crane,
           toolchain,
-          nixfmt,
           ...
         }:
         {
           _module.args = {
-            nixfmt = inputs'.nixfmt.packages.nixfmt;
             toolchain = inputs'.fenix.packages.stable.withComponents [
               "cargo"
               "rustc"
@@ -51,11 +47,12 @@
             crane = (inputs.crane.mkLib pkgs).overrideToolchain (_: toolchain);
           };
 
+          formatter = pkgs.nixfmt-rfc-style;
           checks = { };
           packages = { };
           devShells = {
             default = pkgs.callPackage ./nix/shell.nix {
-              inherit toolchain crane nixfmt;
+              inherit toolchain crane;
             };
           };
           apps = { };
