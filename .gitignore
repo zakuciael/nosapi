@@ -10,8 +10,7 @@
 !.vscode/tasks.json
 !.run/
 
-# Rust stuff
-Cargo.lock
+# Build artifacts
 /target/
 
 # direnv files
