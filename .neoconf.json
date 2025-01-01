@@ -1,0 +1,16 @@
+{
+  "lspconfig": {
+    "nixd": {
+      "nixd": {
+        "options": {
+          "flake-parts-debug": {
+            "expr": "(builtins.getFlake (builtins.toString ./.)).debug.options"
+          },
+          "flake-parts-current-system": {
+            "expr": "(builtins.getFlake (builtins.toString ./.)).currentSystem.options"
+          }
+        }
+      }
+    }
+  }
+}
