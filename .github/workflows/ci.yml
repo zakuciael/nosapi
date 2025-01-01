@@ -89,4 +89,4 @@ jobs:
       - name: check flake.lock
         uses: DeterminateSystems/flake-checker-action@v9
       - name: nix flake check
-        run: nix flake check
+        run: nix flake check --all-systems
