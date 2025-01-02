@@ -87,7 +87,7 @@
           };
 
           checks = {
-            inherit (build.packages) dummy;
+            inherit (build.packages) nosapi_blackbox;
             inherit (build.checks) clippy unit-tests;
           };
 

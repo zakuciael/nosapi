@@ -48,6 +48,6 @@ in
     );
   };
   packages = {
-    dummy = crane.buildPackage (mkArgsForCrate ./../crates/dummy);
+    nosapi_blackbox = crane.buildPackage (mkArgsForCrate ./../crates/nosapi_blackbox);
   };
 }

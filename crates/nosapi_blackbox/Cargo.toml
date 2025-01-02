@@ -1,0 +1,23 @@
+[package]
+name = "nosapi_blackbox"
+version = "1.0.0"
+description = "A library for working with Gameforge's fingerprint/blackbox"
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+base64 = "0.22.1"
+bon = "3.3.1"
+chrono = { version = "0.4.39", features = ["serde", "now"] }
+rand = { version = "0.8.5", features = ["serde"] }
+serde = { version = "1.0.216", features = ["derive"] }
+serde_json = "1.0.134"
+serde_plain = "1.0.2"
+serde_tuple = { version = "1.1.0", git = "https://github.com/zakuciael/serde_tuple" }
+serde_with = { version = "3.12.0", features = ["base64"] }
+percent-encoding = "2.3.1"
+sha2 = "0.10.8"
+thiserror = "2.0.9"
+
+[dev-dependencies]
+rstest = "0.23.0"
