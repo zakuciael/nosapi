@@ -1,7 +1,7 @@
 use crate::vector::VectorString;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_tuple::{DeserializeTuple, SerializeTuple};
+use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
 use serde_with::base64::{Base64, Standard};
 use serde_with::serde_as;
 
@@ -57,7 +57,7 @@ mod tests {
   use crate::fingerprint::Fingerprint;
   use crate::vector::VectorString;
   use chrono::DateTime;
-  use serde_tuple::{DeserializeTuple, SerializeTuple};
+  use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
   use std::str::FromStr;
 
   #[rstest::fixture]
