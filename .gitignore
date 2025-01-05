@@ -16,3 +16,7 @@
 # direnv files
 .direnv/*
 .envrc
+
+# env files
+.env
+*.env

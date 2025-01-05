@@ -1,25 +1,23 @@
 <!--suppress HtmlDeprecatedAttribute, CheckImageSize -->
 <h1 align="center">
     <a href="https://github.com/zakuciael/nosapi">
-        <img alt="NosAPI" src="/assets/logo.png" width="200" />
+        <img alt="NosAPI Blackbox" src="/assets/logo.png" width="200" />
     </a>
     <br />
-    NosAPI
+    NosAPI Blackbox
 </h1>
 
 <h4 align="center">
-  A collection of crates for all things NosTale
+  A library for working with Gameforge's blackbox string
 </h4>
 
-## Available crates
+## Installation
 
-> [!WARNING]
-> Crates with a version below `v1.0.0` are still in **development**, meaning they may often receive **breaking changes**
-> and
-> contain **experimental** features.
-> It is advised to not use them in the production environments.
+To use this crate in your project, run the following command to add it to your dependencies.
 
-- [`nosapi_blackbox`](crates/nosapi_blackbox) - A library for working with Gameforge's blackbox string.
+```bash
+cargo add nosapi_blackbox
+```
 
 ## License
 
