@@ -7,6 +7,7 @@
   treefmt,
   knope ? (callPackage ./tools/knope.nix { inherit crane; }),
   cargo-wrapper ? (callPackage ./tools/cargo-wrapper.nix { inherit (crane) cargo; }),
+  cargo-release ? (callPackage ./tools/cargo-release.nix { inherit crane; }),
 }:
 let
   wrappedToolchain = toolchain.overrideAttrs (prev: {
@@ -20,6 +21,7 @@ crane.devShell {
 
   packages = [
     knope
+    cargo-release
     nixd
     nixfmt-rfc-style
     wrappedToolchain

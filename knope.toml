@@ -1,0 +1,60 @@
+[packages.nosapi_blackbox]
+versioned_files = ["Cargo.lock", "crates/nosapi_blackbox/Cargo.toml"]
+changelog = "crates/nosapi_blackbox/CHANGELOG.md"
+extra_changelog_sections = [
+  { types = ["major"], name = "Major Changes" },
+  { types = ["minor"], name = "Minor Changes" },
+  { types = ["patch"], name = "Patch Changes" },
+]
+
+[github]
+owner = "zakuciael"
+repo = "nosapi"
+
+[[workflows]]
+name = "pre-release"
+
+[[workflows.steps]]
+type = "Command"
+command = "git switch -c chore/release"
+
+[[workflows.steps]]
+type = "PrepareRelease"
+ignore_conventional_commits = true
+
+[[workflows.steps]]
+type = "Command"
+command = "git commit -m \"chore: release\""
+
+[[workflows.steps]]
+type = "Command"
+command = "git push --force --set-upstream origin chore/release"
+
+[[workflows.steps]]
+type = "CreatePullRequest"
+base = "main"
+
+[workflows.steps.title]
+template = "chore: release"
+
+[workflows.steps.body]
+template = "This PR was created by Knope. Merging it will create a new release\n\n$CHANGELOG"
+variables = { "$CHANGELOG" = "ChangelogEntry" }
+
+[[workflows]]
+name = "release"
+
+[[workflows.steps]]
+type = "Release"
+
+[[workflows.steps]]
+type = "Command"
+command = "cargo release publish --workspace --no-confirm --execute"
+
+# TODO: Create publish command for bindings
+
+[[workflows]]
+name = "changeset"
+
+[[workflows.steps]]
+type = "CreateChangeFile"
