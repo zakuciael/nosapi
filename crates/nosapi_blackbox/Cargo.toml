@@ -2,6 +2,8 @@
 name = "nosapi_blackbox"
 version = "0.1.0"
 description = "A library for working with Gameforge's blackbox string"
+keywords = ["nostale", "nosapi", "gameforge", "blackbox", "fingerprint"]
+categories = ["parser-implementations", "parsing"]
 license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/zakuciael/nosapi"
