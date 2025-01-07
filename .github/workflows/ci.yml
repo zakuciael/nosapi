@@ -41,7 +41,7 @@ jobs:
       - name: treefmt
         uses: rrbutani/use-nix-shell-action@v1
         with:
-          devShell: .#default
+          devShell: .#treefmt
           exportEnv: false
           interpreter: bash
           extraNixOptions: --option sandbox true

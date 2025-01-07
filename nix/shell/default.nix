@@ -5,16 +5,9 @@
   cargo-nextest,
   knope,
   napi-cli,
-  nodePackages,
-  treefmt,
-  actionlint,
-  deadnix,
-  nixfmt-rfc-style,
-  prettier ? nodePackages.prettier,
-  statix,
-  taplo,
   nixd,
   just,
+  treefmtDevShell,
 }:
 let
   # Workaround for RustRover being unable to find `clippy` without `rustup`
@@ -26,18 +19,13 @@ in
 mkShell {
   name = "nosapi";
 
+  inputsFrom = [ treefmtDevShell ];
+
   packages = [
     toolchain
     cargo-nextest
     knope
     napi-cli
-    treefmt
-    actionlint
-    deadnix
-    nixfmt-rfc-style
-    prettier
-    statix
-    taplo
     nixd
     just
   ];
