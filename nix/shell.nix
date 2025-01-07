@@ -2,6 +2,7 @@
   mkShell,
   toolchain,
   cargo-wrapper,
+  cargo-nextest,
   knope,
   napi-cli,
   nodePackages,
@@ -27,6 +28,7 @@ mkShell {
 
   packages = [
     toolchain
+    cargo-nextest
     knope
     napi-cli
     treefmt
@@ -46,6 +48,5 @@ mkShell {
       mkdir -p .direnv/links/
       ln -sf "${wrappedToolchain}" .direnv/links/rust
     fi
-
   '';
 }

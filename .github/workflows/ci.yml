@@ -25,10 +25,9 @@ jobs:
       - name: check flake.lock
         uses: DeterminateSystems/flake-checker-action@v9
       - name: nix flake check
-        run: nix flake check -L
-  dependencies:
-    name: cargo build | dependencies
-    needs: flake
+        run: nix flake check -L --option sandbox true
+  format:
+    name: treefmt
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -39,46 +38,50 @@ jobs:
           github_access_token: ${{ github.token }}
       - name: nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
-      - name: use nix shell
+      - name: treefmt
         uses: rrbutani/use-nix-shell-action@v1
         with:
           devShell: .#default
-      - name: rust cache
-        id: cargo-cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: ci
-      - name: rust problem matcher
-        run: echo "::add-matcher::./.github/matcher.json"
-      - name: cargo build | dependencies
-        if: steps.cargo-cache.outputs.cache-hit != 'true'
-        run: cargo build --workspace
-      - name: cargo build | dev dependencies
-        if: steps.cargo-cache.outputs.cache-hit != 'true'
-        run: cargo test --workspace --no-run
-  check:
-    name: just check
-    needs: dependencies
+          exportEnv: false
+          interpreter: bash
+          extraNixOptions: --option sandbox true
+          script: treefmt --ci
+  clippy:
+    name: cargo clippy
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - name: install nix
-        uses: cachix/install-nix-action@v30
+      - name: install rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          github_access_token: ${{ github.token }}
-      - name: nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
-      - name: use nix shell
-        uses: rrbutani/use-nix-shell-action@v1
+          cache: true
+          matcher: true
+      - name: cargo clippy
+        run: cargo clippy --workspace -- --deny warnings
+  cargo-test:
+    name: cargo nextest (${{ matrix.os }})
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: install rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          devShell: .#default
-      - name: rust cache
-        id: cargo-cache
-        uses: Swatinem/rust-cache@v2
+          cache: true
+          matcher: true
+      - name: install cargo-nextest
+        uses: taiki-e/install-action@v2
         with:
-          shared-key: ci
-      - name: rust problem matcher
-        run: echo "::add-matcher::./.github/matcher.json"
-      - name: just check
-        run: just check
+          tool: cargo-nextest
+      - name: cargo nextest
+        run: cargo nextest run
+  # TODO: Add builds for node bindings for all supported platforms
+  # TODO: Add tests for node bindings for all supported platforms
