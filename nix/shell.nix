@@ -1,30 +1,43 @@
 {
+  mkShell,
   toolchain,
-  crane,
-  callPackage,
-  nixd,
-  nixfmt-rfc-style,
+  cargo-wrapper,
+  knope,
+  napi-cli,
+  nodePackages,
   treefmt,
-  knope ? (callPackage ./tools/knope.nix { inherit crane; }),
-  cargo-wrapper ? (callPackage ./tools/cargo-wrapper.nix { inherit (crane) cargo; }),
-  cargo-release ? (callPackage ./tools/cargo-release.nix { inherit crane; }),
+  actionlint,
+  deadnix,
+  nixfmt-rfc-style,
+  prettier ? nodePackages.prettier,
+  statix,
+  taplo,
+  nixd,
+  just,
 }:
 let
+  # Workaround for RustRover being unable to find `clippy` without `rustup`
+  # This wrapper forwards calls to `cargo check` to the `cargo clippy` command.
   wrappedToolchain = toolchain.overrideAttrs (prev: {
     buildCommand = prev.buildCommand + "cp -f ${cargo-wrapper}/bin/cargo-wrapper $out/bin/cargo";
   });
 in
-crane.devShell {
+mkShell {
   name = "nosapi";
 
-  inputsFrom = [ treefmt ];
-
   packages = [
+    toolchain
     knope
-    cargo-release
-    nixd
+    napi-cli
+    treefmt
+    actionlint
+    deadnix
     nixfmt-rfc-style
-    wrappedToolchain
+    prettier
+    statix
+    taplo
+    nixd
+    just
   ];
 
   shellHook = ''
@@ -33,5 +46,6 @@ crane.devShell {
       mkdir -p .direnv/links/
       ln -sf "${wrappedToolchain}" .direnv/links/rust
     fi
+
   '';
 }

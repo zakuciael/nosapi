@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  check:
+  flake:
     name: nix flake check
     runs-on: ubuntu-latest
     steps:
@@ -25,4 +25,60 @@ jobs:
       - name: check flake.lock
         uses: DeterminateSystems/flake-checker-action@v9
       - name: nix flake check
-        run: nix flake check --all-systems --print-build-logs
+        run: nix flake check -L
+  dependencies:
+    name: cargo build | dependencies
+    needs: flake
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: install nix
+        uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ github.token }}
+      - name: nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+      - name: use nix shell
+        uses: rrbutani/use-nix-shell-action@v1
+        with:
+          devShell: .#default
+      - name: rust cache
+        id: cargo-cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ci
+      - name: rust problem matcher
+        run: echo "::add-matcher::./.github/matcher.json"
+      - name: cargo build | dependencies
+        if: steps.cargo-cache.outputs.cache-hit != 'true'
+        run: cargo build --workspace
+      - name: cargo build | dev dependencies
+        if: steps.cargo-cache.outputs.cache-hit != 'true'
+        run: cargo test --workspace --no-run
+  check:
+    name: just check
+    needs: dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: install nix
+        uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ github.token }}
+      - name: nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+      - name: use nix shell
+        uses: rrbutani/use-nix-shell-action@v1
+        with:
+          devShell: .#default
+      - name: rust cache
+        id: cargo-cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ci
+      - name: rust problem matcher
+        run: echo "::add-matcher::./.github/matcher.json"
+      - name: just check
+        run: just check
