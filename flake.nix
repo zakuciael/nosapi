@@ -45,7 +45,7 @@
             default = pkgs.callPackage ./nix/shell.nix {
               inherit toolchain;
               cargo-wrapper = pkgs.callPackage ./nix/tools/cargo-wrapper.nix { cargo = toolchain; };
-              knope = pkgs.callPackage ./nix/tools/knope.nix { inherit rustPlatform; };
+              knope = pkgs.callPackage ./nix/tools/knope.nix { };
               napi-cli = pkgs.callPackage ./nix/tools/napi-cli { };
             };
           };
