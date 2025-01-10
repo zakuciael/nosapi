@@ -9,6 +9,7 @@
   statix,
   taplo,
   just,
+  rustfmt,
 }:
 mkShell {
   name = "nosapi-treefmt";
@@ -21,5 +22,6 @@ mkShell {
     statix
     taplo
     just
+    rustfmt
   ];
 }
