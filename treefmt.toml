@@ -1,0 +1,104 @@
+[formatter.actionlint]
+command = "actionlint"
+excludes = []
+includes = [
+  ".github/workflows/*.yml",
+  ".github/workflows/*.yaml",
+]
+options = []
+
+[formatter.deadnix]
+command = "deadnix"
+excludes = ["nix/tools/napi-cli/*.nix"]
+includes = ["*.nix"]
+options = ["--edit"]
+
+[formatter.nixfmt]
+command = "nixfmt"
+excludes = []
+includes = ["*.nix"]
+options = []
+
+[formatter.prettier]
+command = "prettier"
+excludes = []
+includes = [
+  "*.cjs",
+  "*.css",
+  "*.html",
+  "*.js",
+  "*.json",
+  "*.json5",
+  "*.jsx",
+  "*.md",
+  "*.mdx",
+  "*.mjs",
+  "*.scss",
+  "*.ts",
+  "*.tsx",
+  "*.vue",
+  "*.yaml",
+  "*.yml",
+]
+options = [
+  "--write",
+  "--config",
+  "prettierrc.json",
+]
+
+[formatter.rustfmt]
+command = "rustfmt"
+excludes = []
+includes = ["*.rs"]
+options = [
+  "--edition",
+  "2021",
+  "--config",
+  "skip_children=true",
+]
+
+[formatter.statix]
+command = "bash"
+excludes = ["nix/tools/napi-cli/*.nix"]
+includes = ["*.nix"]
+options = [
+  "-euc",
+  'for file in "$@"; do statix fix "$file"; done',
+]
+
+[formatter.taplo]
+command = "taplo"
+excludes = []
+includes = ["*.toml"]
+options = ["format"]
+
+[formatter.just]
+command = "bash"
+excludes = []
+includes = [
+  "[Jj][Uu][Ss][Tt][Ff][Ii][Ll][Ee]",  # 'justfile', case insensitive
+  ".[Jj][Uu][Ss][Tt][Ff][Ii][Ll][Ee]", # '.justfile', case insensitive
+]
+options = [
+  "-euc",
+  'for file in "$@"; do just --fmt --unstable --justfile "$file"; done',
+]
+
+[global]
+excludes = [
+  "*.lock",
+  "*.patch",
+  "package-lock.json",
+  "go.mod",
+  "go.sum",
+  ".gitignore",
+  ".gitmodules",
+  ".hgignore",
+  ".svnignore",
+  ".git/*",
+  ".idea/*",
+  ".vscode/*",
+  ".run/*",
+  "assets/*",
+]
+on-unmatched = "warn"

@@ -1,29 +1,28 @@
-{ crane, fetchFromGitHub }:
-let
-  src = crane.cleanCargoSource (fetchFromGitHub {
+{
+  git,
+  rustPlatform,
+  fetchFromGitHub,
+  pkg-config,
+}:
+rustPlatform.buildRustPackage rec {
+  pname = "knope";
+  version = "0.18.1";
+
+  src = fetchFromGitHub {
     owner = "knope-dev";
     repo = "knope";
-    rev = "knope/v0.18.1";
+    rev = "knope/v${version}";
     hash = "sha256-KA5ePuN9MWbhsrz3UVr8brbs77P0AHXK/3f6RccfWac=";
-  });
-  commonArgs = {
-    inherit src;
-    inherit
-      (crane.crateNameFromCargoToml {
-        cargoToml = "${src}/crates/knope/Cargo.toml";
-      })
-      pname
-      version
-      ;
-    strictDeps = true;
   };
-  cargoArtifacts = crane.buildDepsOnly commonArgs;
-in
-crane.buildPackage (
-  commonArgs
-  // {
-    inherit cargoArtifacts;
-    cargoExtraArgs = "-p knope";
-    doCheck = false;
-  }
-)
+
+  cargoHash = "sha256-QOpw1/ZpDl9UsQS+j4Km+iFXpChWajNp69kQFyFfRW4=";
+
+  nativeBuildInputs = [ pkg-config ];
+
+  nativeCheckInputs = [ git ];
+
+  cargoBuildFlags = [
+    "-p"
+    "knope"
+  ];
+}
