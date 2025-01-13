@@ -39,13 +39,7 @@ jobs:
       - name: nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
       - name: treefmt
-        uses: rrbutani/use-nix-shell-action@v1
-        with:
-          devShell: .#treefmt
-          exportEnv: false
-          interpreter: bash
-          extraNixOptions: --option sandbox true
-          script: treefmt --ci
+        run: nix develop --option sandbox true --command treefmt --ci
   clippy:
     name: cargo clippy
     runs-on: ubuntu-latest
