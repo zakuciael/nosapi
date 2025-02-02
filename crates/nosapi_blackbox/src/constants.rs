@@ -10,5 +10,3 @@ pub const URI_COMPONENT_SET: &AsciiSet = &NON_ALPHANUMERIC
   .remove(b'\'')
   .remove(b'(')
   .remove(b')');
-
-pub const VECTOR_STRING_LENGTH: usize = 100;

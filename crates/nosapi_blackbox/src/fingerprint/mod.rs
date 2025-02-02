@@ -2,7 +2,6 @@ use crate::vector::VectorString;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
-use serde_with::base64::{Base64, Standard};
 use serde_with::serde_as;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -44,7 +43,7 @@ pub struct Fingerprint {
   pub game: String,
   pub delta: u32,
   pub os_version: Option<String>,
-  #[serde_as(as = "Base64<Standard>")]
+  #[serde_as(as = "crate::support::Base64")]
   pub vector: VectorString,
   pub user_agent: String,
   pub server_time: DateTime<Utc>,
