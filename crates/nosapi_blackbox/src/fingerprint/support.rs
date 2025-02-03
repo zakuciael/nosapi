@@ -1,8 +1,10 @@
+use core::fmt::Display;
 use serde::{Deserializer, Serializer};
 use serde_with::{DeserializeAs, SerializeAs};
-use std::fmt::Display;
 
-pub struct Base64;
+/// A thin wrapper around the [`serde_with::base64::Base64`] de/serialize type.
+/// Implementing serialization from the [`Display`] trait.
+pub(super) struct Base64;
 
 impl<T> SerializeAs<T> for Base64
 where

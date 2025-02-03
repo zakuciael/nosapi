@@ -1,83 +1,172 @@
-mod de;
-mod ser;
+pub mod error;
+mod serde;
+mod support;
 
-use crate::fingerprint::Fingerprint;
+use self::error::{
+  DecodeBlackboxError, DecryptBlackboxError, EncodeBlackboxError, EncryptBlackboxError,
+};
+use super::fingerprint::Fingerprint;
+use crate::blackbox::support::{base64_encode, create_encryption_key, xor};
+use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
-use sha2::Digest;
+use derive_more::Constructor;
+use percent_encoding::{percent_decode, percent_encode, AsciiSet, NON_ALPHANUMERIC};
+use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
+use std::str::FromStr;
 
-fn create_encryption_key<GsId, AccountId>(gsid: &GsId, account_id: &AccountId) -> Vec<u8>
-where
-  GsId: AsRef<str>,
-  AccountId: AsRef<str>,
-{
-  let key = format!("{}-{}", gsid.as_ref(), account_id.as_ref());
-  let hash = sha2::Sha512::digest(&key);
+const ENCODED_BLACKBOX_PREFIX: &str = "tra:";
+const BLACKBOX_ASCII_SET: &AsciiSet = &NON_ALPHANUMERIC
+  .remove(b'-')
+  .remove(b'_')
+  .remove(b'.')
+  .remove(b'!')
+  .remove(b'~')
+  .remove(b'*')
+  .remove(b'\'')
+  .remove(b'(')
+  .remove(b')');
 
-  format!("{:x}", hash).into()
-}
-
-fn xor(data: &[u8], key: &[u8]) -> Vec<u8> {
-  data
-    .iter()
-    .enumerate()
-    .map(|(index, val)| val ^ key[index % key.len()] ^ key[key.len() - (index % key.len()) - 1])
-    .collect::<Vec<_>>()
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DecryptBlackboxError {
-  #[error("failed to decode base64: {0}")]
-  Base64(#[from] base64::DecodeError),
-  #[error("received invalid utf8: {0}")]
-  Utf8(#[from] std::string::FromUtf8Error),
-  #[error("failed to deserialize: {0}")]
-  Serde(#[from] serde_plain::Error),
-}
-
-#[derive(thiserror::Error, Debug)]
-#[error("failed to encrypt: {0}")]
-pub struct EncryptBlackboxError(#[from] serde_plain::Error);
-
-#[derive(Clone, PartialEq, Debug)]
-pub struct Blackbox(pub Fingerprint);
+#[derive(Constructor, Clone, PartialEq, Debug)]
+pub struct Blackbox(Fingerprint);
 
 impl Blackbox {
-  pub fn new(fingerprint: Fingerprint) -> Self {
-    Self(fingerprint)
+  pub fn into_inner(self) -> Fingerprint {
+    self.0
   }
 
-  pub fn decrypt<Value, GsId, AccountId>(
-    value: &Value,
-    gsid: &GsId,
-    account_id: &AccountId,
+  pub fn encode(&self) -> Result<String, EncodeBlackboxError> {
+    let fingerprint_json = {
+      let mut vec = Vec::with_capacity(128);
+      let mut ser = serde_json::Serializer::new(&mut vec);
+      self.0.serialize_tuple(&mut ser)?;
+
+      vec
+    };
+    let url_encoded = percent_encode(&fingerprint_json, BLACKBOX_ASCII_SET)
+      .to_string()
+      .into_bytes();
+
+    let len = url_encoded.len();
+    let mut gf_encoded = Vec::with_capacity(len);
+    gf_encoded.push(url_encoded[0]);
+
+    for i in 1..len {
+      let a = gf_encoded[i - 1] as u32; // Prev encoded character
+      let b = url_encoded[i] as u32; // Character to encode
+
+      // The module ensures that the result is within the range of [0, 255],
+      // which makes it a valid 8-bit unsigned integer value
+      gf_encoded.push(((a + b) % 0x100) as u8)
+    }
+
+    let mut base64_encoded = String::from(ENCODED_BLACKBOX_PREFIX);
+    if base64_encode(&URL_SAFE_NO_PAD, gf_encoded, &mut base64_encoded) {
+      Ok(base64_encoded)
+    } else {
+      Err(EncodeBlackboxError::InputTooBig)
+    }
+  }
+
+  pub fn decode<T>(s: T) -> Result<Blackbox, DecodeBlackboxError>
+  where
+    T: AsRef<[u8]>,
+  {
+    let blackbox = s
+      .as_ref()
+      .strip_prefix(ENCODED_BLACKBOX_PREFIX.as_bytes())
+      .unwrap_or(s.as_ref());
+    let base64_decoded = URL_SAFE_NO_PAD.decode(blackbox)?;
+
+    let len = base64_decoded.len();
+    let mut gf_decoded = Vec::with_capacity(len);
+    gf_decoded.push(base64_decoded[0]);
+
+    for i in 1..len {
+      let mut a = base64_decoded[i] as u32; // Current character
+      let b = base64_decoded[i - 1] as u32; // Prev character
+
+      if a < b {
+        a += 0x100;
+      }
+
+      // Can be safely cast to an 8-bit unsigned integer due to the checks above.
+      gf_decoded.push((a - b) as u8)
+    }
+
+    let url_decoded = percent_decode(&gf_decoded).collect::<Vec<_>>();
+    let mut de = serde_json::Deserializer::from_slice(&url_decoded);
+    Ok(Blackbox::new(Fingerprint::deserialize_tuple(&mut de)?))
+  }
+
+  pub fn encrypt(&self, gsid: &str, account_id: &str) -> Result<String, EncryptBlackboxError> {
+    let encryption_key = create_encryption_key(gsid, account_id);
+    let encoded_blackbox = self.encode()?;
+    let xored = xor(encoded_blackbox.as_bytes(), &encryption_key);
+
+    let mut base64_encoded = String::new();
+    if base64_encode(&STANDARD, xored, &mut base64_encoded) {
+      Ok(base64_encoded)
+    } else {
+      Err(EncryptBlackboxError::TooBig)
+    }
+  }
+
+  pub fn decrypt<T>(
+    input: T,
+    gsid: &str,
+    account_id: &str,
   ) -> Result<Blackbox, DecryptBlackboxError>
   where
-    Value: AsRef<str>,
-    GsId: AsRef<str>,
-    AccountId: AsRef<str>,
+    T: AsRef<[u8]>,
   {
-    let base64_decoded = base64::engine::general_purpose::STANDARD.decode(value.as_ref())?;
     let encryption_key = create_encryption_key(gsid, account_id);
-
+    let base64_decoded = STANDARD.decode(input)?;
     let xored = xor(&base64_decoded, &encryption_key);
-    let blackbox = String::from_utf8(xored)?;
-    Ok(serde_plain::from_str::<Blackbox>(&blackbox)?)
+
+    Ok(Blackbox::decode(xored)?)
   }
+}
 
-  pub fn encrypt<GsId, AccountId>(
-    self,
-    gsid: &GsId,
-    account_id: &AccountId,
-  ) -> Result<String, EncryptBlackboxError>
-  where
-    GsId: AsRef<str>,
-    AccountId: AsRef<str>,
-  {
-    let blackbox = serde_plain::to_string(&self)?.into_bytes();
-    let encryption_key = create_encryption_key(gsid, account_id);
+impl FromStr for Blackbox {
+  type Err = DecodeBlackboxError;
 
-    let xored = xor(&blackbox, &encryption_key);
-    Ok(base64::engine::general_purpose::STANDARD.encode(&xored))
+  #[inline]
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    Self::decode(s)
+  }
+}
+
+impl TryFrom<String> for Blackbox {
+  type Error = DecodeBlackboxError;
+
+  #[inline]
+  fn try_from(value: String) -> Result<Self, Self::Error> {
+    Self::decode(&value)
+  }
+}
+
+impl TryFrom<&str> for Blackbox {
+  type Error = DecodeBlackboxError;
+
+  #[inline]
+  fn try_from(value: &str) -> Result<Self, Self::Error> {
+    Self::decode(value)
+  }
+}
+
+impl TryFrom<Vec<u8>> for Blackbox {
+  type Error = DecodeBlackboxError;
+
+  fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+    Self::decode(&value)
+  }
+}
+
+impl TryFrom<&[u8]> for Blackbox {
+  type Error = DecodeBlackboxError;
+
+  fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+    Self::decode(value)
   }
 }
 
@@ -154,19 +243,32 @@ mod tests {
   }
 
   #[rstest::rstest]
-  fn should_correctly_serialize(blackbox_inst: Blackbox, blackbox_encoded_string: &str) {
-    let res = serde_plain::to_string(&blackbox_inst);
+  fn should_correctly_encode(blackbox_inst: Blackbox, blackbox_encoded_string: &str) {
+    assert_eq!(blackbox_inst.encode().unwrap(), blackbox_encoded_string);
+  }
 
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), blackbox_encoded_string);
+  #[rstest::rstest]
+  fn should_correctly_decode(blackbox_encoded_string: &str, blackbox_inst: Blackbox) {
+    assert_eq!(
+      Blackbox::decode(blackbox_encoded_string).unwrap(),
+      blackbox_inst
+    );
+  }
+
+  #[rstest::rstest]
+  fn should_correctly_serialize(blackbox_inst: Blackbox, blackbox_encoded_string: &str) {
+    assert_eq!(
+      serde_plain::to_string(&blackbox_inst).unwrap(),
+      blackbox_encoded_string
+    );
   }
 
   #[rstest::rstest]
   fn should_correctly_deserialize(blackbox_encoded_string: &str, blackbox_inst: Blackbox) {
-    let res = serde_plain::from_str::<Blackbox>(blackbox_encoded_string);
-
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), blackbox_inst);
+    assert_eq!(
+      serde_plain::from_str::<Blackbox>(blackbox_encoded_string).unwrap(),
+      blackbox_inst
+    );
   }
 
   #[rstest::rstest]
@@ -176,10 +278,10 @@ mod tests {
     account_id: &str,
     blackbox_encrypted_string: &str,
   ) {
-    let res = blackbox_inst.encrypt(&gsid, &account_id);
-
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), blackbox_encrypted_string);
+    assert_eq!(
+      blackbox_inst.encrypt(gsid, account_id).unwrap(),
+      blackbox_encrypted_string
+    );
   }
 
   #[rstest::rstest]
@@ -189,9 +291,9 @@ mod tests {
     account_id: &str,
     blackbox_inst: Blackbox,
   ) {
-    let res = Blackbox::decrypt(&blackbox_encrypted_string, &gsid, &account_id);
-
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), blackbox_inst);
+    assert_eq!(
+      Blackbox::decrypt(blackbox_encrypted_string, gsid, account_id).unwrap(),
+      blackbox_inst
+    );
   }
 }

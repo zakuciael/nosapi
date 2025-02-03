@@ -1,47 +1,28 @@
-mod error;
+pub mod error;
 mod support;
 
-use self::support::random_vector_string_data;
 use crate::support::mockable::chrono::current_datetime;
 
 use crate::vector::error::ParseVectorStringError;
-use crate::vector::support::random_ascii_char;
-use bon::Builder;
+use crate::vector::support::{random_ascii_char, random_vector_string_data};
 use chrono::Utc;
 use chrono::{DateTime, TimeDelta};
+use derive_more::Constructor;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::Add;
 use std::str::{from_utf8, FromStr};
 
-#[derive(Builder, DeserializeFromStr, SerializeDisplay, Clone, PartialEq, Debug)]
+#[cfg_attr(feature = "builders", derive(bon::Builder))]
+#[derive(Constructor, DeserializeFromStr, SerializeDisplay, Clone, PartialEq, Debug)]
 pub struct VectorString {
-  #[builder(default = random_vector_string_data())]
+  #[cfg_attr(feature = "builders", builder(default = random_vector_string_data()))]
   data: String,
-  #[builder(default = current_datetime())]
+  #[cfg_attr(feature = "builders", builder(default = current_datetime()))]
   date_time: DateTime<Utc>,
 }
 
 impl VectorString {
-  pub fn new(data: String, date_time: DateTime<Utc>) -> Self {
-    Self { data, date_time }
-  }
-
-  pub fn parse<Value>(value: &Value) -> Result<VectorString, ParseVectorStringError>
-  where
-    Value: AsRef<str>,
-  {
-    let value = value.as_ref();
-    let divider_index = value.rfind(' ').ok_or(ParseVectorStringError::NoDivider)?;
-
-    let data = value[0..divider_index].to_string();
-    let date_time =
-      DateTime::<Utc>::from_timestamp_millis(i64::from_str(&value[divider_index + 1..])?)
-        .ok_or(ParseVectorStringError::OutOfRangeTimestamp)?;
-
-    Ok(VectorString { data, date_time })
-  }
-
   pub fn data(&self) -> &str {
     &self.data
   }
@@ -64,12 +45,30 @@ impl VectorString {
 
     self
   }
+
+  pub fn parse<T>(value: T) -> Result<VectorString, ParseVectorStringError>
+  where
+    T: AsRef<str>,
+  {
+    let value = value.as_ref();
+    let divider_index = value.rfind(' ').ok_or(ParseVectorStringError::NoDivider)?;
+
+    let data = value[0..divider_index].to_string();
+    let date_time =
+      DateTime::<Utc>::from_timestamp_millis(i64::from_str(&value[divider_index + 1..])?)
+        .ok_or(ParseVectorStringError::OutOfRangeTimestamp)?;
+
+    Ok(VectorString { data, date_time })
+  }
 }
 
 impl Default for VectorString {
   #[inline]
   fn default() -> Self {
-    VectorString::builder().build()
+    VectorString {
+      data: random_vector_string_data(),
+      date_time: current_datetime(),
+    }
   }
 }
 
@@ -84,7 +83,7 @@ impl FromStr for VectorString {
 
   #[inline]
   fn from_str(s: &str) -> Result<Self, Self::Err> {
-    Self::parse(&s)
+    Self::parse(s)
   }
 }
 
@@ -102,7 +101,7 @@ impl TryFrom<&str> for VectorString {
 
   #[inline]
   fn try_from(value: &str) -> Result<Self, Self::Error> {
-    Self::parse(&value)
+    Self::parse(value)
   }
 }
 
@@ -111,7 +110,7 @@ impl TryFrom<Vec<u8>> for VectorString {
 
   #[inline]
   fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-    Self::parse(&from_utf8(&value)?)
+    Self::parse(from_utf8(&value)?)
   }
 }
 
@@ -120,13 +119,13 @@ impl TryFrom<&[u8]> for VectorString {
 
   #[inline]
   fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-    Self::parse(&from_utf8(value)?)
+    Self::parse(from_utf8(value)?)
   }
 }
 
 #[cfg(test)]
 mod tests {
-  use crate::support::mockable::chrono::set_timestamp;
+  use crate::support::mockable::chrono::{current_datetime, set_timestamp};
   use crate::support::mockable::rand::set_seed;
   use crate::vector::support::random_vector_string_data;
   use crate::vector::VectorString;
@@ -222,7 +221,7 @@ mod tests {
 
     // Generate vector data and instance
     let data = random_vector_string_data();
-    let mut vector = VectorString::builder().data(data.clone()).build();
+    let mut vector = VectorString::new(data.clone(), current_datetime());
 
     // Advance the current time by 1500 milliseconds
     timestamp += 1500;

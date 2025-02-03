@@ -3,7 +3,7 @@ use std::str::Utf8Error;
 use std::string::FromUtf8Error;
 use thiserror::Error;
 
-#[derive(Error, Clone, PartialEq, Eq, Debug)]
+#[derive(Error, Debug)]
 pub enum ParseVectorStringError {
   #[error("no data divider found")]
   NoDivider,
