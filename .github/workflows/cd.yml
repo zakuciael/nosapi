@@ -32,6 +32,8 @@ jobs:
       - name: create release pr
         run: knope pre-release --verbose
         continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   release:
     name: release
     if: "${{ github.event_name == 'pull_request' && github.head_ref == 'chore/release' && github.event.pull_request.merged == true }}"
@@ -52,3 +54,5 @@ jobs:
           version: "0.20.0"
       - name: create release pr
         run: knope release --verbose
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
