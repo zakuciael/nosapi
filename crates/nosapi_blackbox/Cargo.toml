@@ -1,6 +1,6 @@
 [package]
 name = "nosapi_blackbox"
-version = "0.1.0"
+version = "0.2.0"
 description = "A library for working with Gameforge's blackbox string"
 keywords = ["nostale", "nosapi", "gameforge", "blackbox", "fingerprint"]
 categories = ["parser-implementations", "parsing"]
