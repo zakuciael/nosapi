@@ -209,13 +209,17 @@ mod tests {
   }
 
   #[rstest::fixture]
-  fn gsid() -> String {
-    "4fcf4367-1a2e-48b8-9b9a-129fae8a8e5c".to_string()
+  fn request_inst(installation_id: String) -> Request {
+    Request {
+      features: vec![7734],
+      session: "129fae8a8e5c".to_string(),
+      installation_id,
+    }
   }
 
   #[rstest::fixture]
-  fn session() -> String {
-    "129fae8a8e5c".to_string()
+  fn gsid() -> String {
+    "4fcf4367-1a2e-48b8-9b9a-129fae8a8e5c".to_string()
   }
 
   #[rstest::fixture]
@@ -273,13 +277,11 @@ mod tests {
   fn should_correctly_create_request_struct(
     gsid: String,
     installation_id: String,
-    session: String,
+    request_inst: Request,
   ) {
     let res = Request::new(gsid, installation_id.clone());
     assert!(res.is_ok());
 
-    let res = res.unwrap();
-    assert_eq!(&res.session, &session);
-    assert_eq!(&res.installation_id, &installation_id)
+    assert_eq!(res.unwrap(), request_inst);
   }
 }
