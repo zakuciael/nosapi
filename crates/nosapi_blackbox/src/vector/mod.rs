@@ -1,3 +1,6 @@
+//! Implementation of the `vector`
+//! string used to identity the modification time of the `blackbox` string.
+
 use crate::utils;
 use crate::utils::generate_vector_string;
 use bon::bon;
@@ -13,6 +16,7 @@ use crate::mock::chrono::Utc;
 #[cfg(not(test))]
 use chrono::Utc;
 
+/// A `vector` string containing information about the modification time of the `blackbox` string.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct VectorString(pub String);
 
@@ -42,6 +46,8 @@ impl VectorString {
     DateTime::<chrono::Utc>::from_timestamp_millis(i64::from_str(raw).ok()?)
   }
 
+  /// Update the modification time of the `blackbox` string using the current date and time.
+  /// This method returns `None` if no modification was needed and `Some(())` otherwise.
   pub fn update(&mut self) -> Option<()> {
     let last_time = self.timestamp()?;
     let data = self.data()?;

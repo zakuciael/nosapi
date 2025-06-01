@@ -1,3 +1,10 @@
+//! Implementation of the `fingerprint` struct found in the `blackbox` string.
+
+use rand::Rng;
+pub mod error;
+
+use crate::fingerprint::error::InvalidGsid;
+use crate::utils::rng_generator;
 use crate::vector::VectorString;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -5,6 +12,7 @@ use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
 use serde_with::base64::{Base64, Standard};
 use serde_with::serde_as;
 
+/// A `request` struct used when generating an encrypted `blackbox` string.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Request {
   features: Vec<u64>,
@@ -13,6 +21,28 @@ pub struct Request {
   session: String,
 }
 
+impl Request {
+  /// Create a new `Request` struct from `gsid` and `installation_id`
+  ///
+  /// # Errors
+  /// This method can error whenever the provided `gsid` is invalid.
+  pub fn new(gsid: String, installation_id: String) -> Result<Self, InvalidGsid> {
+    let features = rng_generator().gen_range(1..9999);
+    let session = {
+      let index = gsid.rfind("-").ok_or(InvalidGsid)?;
+      let session = &gsid[index + 1..];
+      session.to_string()
+    };
+
+    Ok(Self {
+      features: vec![features],
+      installation_id,
+      session,
+    })
+  }
+}
+
+/// A `fingerprint` struct containing information needed to fingerprint users.
 #[serde_as]
 #[derive(Serialize, SerializeTuple, Deserialize, DeserializeTuple, Clone, PartialEq, Debug)]
 pub struct Fingerprint {
@@ -54,7 +84,7 @@ pub struct Fingerprint {
 
 #[cfg(test)]
 mod tests {
-  use crate::fingerprint::Fingerprint;
+  use crate::fingerprint::{Fingerprint, Request};
   use crate::vector::VectorString;
   use chrono::DateTime;
   use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
@@ -178,6 +208,21 @@ mod tests {
 ]"#.to_string()
   }
 
+  #[rstest::fixture]
+  fn gsid() -> String {
+    "4fcf4367-1a2e-48b8-9b9a-129fae8a8e5c".to_string()
+  }
+
+  #[rstest::fixture]
+  fn session() -> String {
+    "129fae8a8e5c".to_string()
+  }
+
+  #[rstest::fixture]
+  fn installation_id() -> String {
+    "639edac7-9b6e-454e-80d9-545a5e299860".to_string()
+  }
+
   #[rstest::rstest]
   fn should_correctly_serialize_to_json(fingerprint_inst: Fingerprint, fingerprint_json: String) {
     let res = serde_json::to_string_pretty(&fingerprint_inst);
@@ -222,5 +267,19 @@ mod tests {
 
     assert!(res.is_ok());
     assert_eq!(res.unwrap(), fingerprint_inst);
+  }
+
+  #[rstest::rstest]
+  fn should_correctly_create_request_struct(
+    gsid: String,
+    installation_id: String,
+    session: String,
+  ) {
+    let res = Request::new(gsid, installation_id.clone());
+    assert!(res.is_ok());
+
+    let res = res.unwrap();
+    assert_eq!(&res.session, &session);
+    assert_eq!(&res.installation_id, &installation_id)
   }
 }
