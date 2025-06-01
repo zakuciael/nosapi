@@ -51,8 +51,6 @@ type = "Release"
 type = "Command"
 command = "cargo release publish --workspace --no-confirm --execute"
 
-# TODO: Create publish command for bindings
-
 [[workflows]]
 name = "changeset"
 

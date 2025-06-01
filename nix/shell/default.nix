@@ -4,7 +4,6 @@
   cargo-wrapper,
   cargo-nextest,
   knope,
-  napi-cli,
   nixd,
   just,
   treefmtDevShell,
@@ -25,7 +24,6 @@ mkShell {
     toolchain
     cargo-nextest
     knope
-    napi-cli
     nixd
     just
   ];

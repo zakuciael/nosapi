@@ -46,7 +46,6 @@
               inherit toolchain;
               cargo-wrapper = pkgs.callPackage ./nix/tools/cargo-wrapper.nix { cargo = toolchain; };
               knope = pkgs.callPackage ./nix/tools/knope.nix { };
-              napi-cli = pkgs.callPackage ./nix/tools/napi-cli { };
               treefmtDevShell = treefmt;
             };
             treefmt = pkgs.callPackage ./nix/shell/treefmt.nix { };
