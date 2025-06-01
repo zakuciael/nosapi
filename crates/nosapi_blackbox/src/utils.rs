@@ -6,7 +6,7 @@ fn random_ascii_generator() -> Uniform<u8> {
   Uniform::new(32, 126)
 }
 
-fn rng_generator() -> impl Rng {
+pub fn rng_generator() -> impl Rng {
   #[cfg(test)]
   return crate::mock::rand::get_rng();
 

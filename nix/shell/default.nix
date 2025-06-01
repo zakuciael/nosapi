@@ -3,6 +3,9 @@
   toolchain,
   cargo-wrapper,
   cargo-nextest,
+  cargo-watch,
+  nodePackages,
+  browser-sync ? nodePackages.browser-sync,
   knope,
   nixd,
   just,
@@ -23,9 +26,11 @@ mkShell {
   packages = [
     toolchain
     cargo-nextest
+    cargo-watch
     knope
     nixd
     just
+    browser-sync
   ];
 
   shellHook = ''
