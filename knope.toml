@@ -7,6 +7,12 @@ extra_changelog_sections = [
   { types = ["patch"], name = "Patch Changes" },
 ]
 
+[bot.releases]
+enabled = true
+
+[bot.checks]
+enabled = false
+
 [github]
 owner = "zakuciael"
 repo = "nosapi"
@@ -46,10 +52,6 @@ name = "release"
 
 [[workflows.steps]]
 type = "Release"
-
-[[workflows.steps]]
-type = "Command"
-command = "cargo release publish --workspace --no-confirm --execute"
 
 [[workflows]]
 name = "changeset"
