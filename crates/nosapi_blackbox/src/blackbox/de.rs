@@ -13,8 +13,7 @@ impl<'de> Deserialize<'de> for Blackbox {
   {
     struct BlackboxVisitor;
 
-    #[allow(clippy::needless_lifetimes)]
-    impl<'de> Visitor<'de> for BlackboxVisitor {
+    impl Visitor<'_> for BlackboxVisitor {
       type Value = Blackbox;
 
       fn expecting(&self, f: &mut Formatter) -> std::fmt::Result {
