@@ -2,6 +2,7 @@
 .idea/*
 .vscode/*
 !.idea/copyright/
+!.idea/watcherTasks.xml
 !.vscode/settings.json
 !.vscode/extensions.json
 
