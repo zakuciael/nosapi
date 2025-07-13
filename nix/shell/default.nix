@@ -10,6 +10,8 @@
   nixd,
   just,
   treefmtDevShell,
+  openssl,
+  pkg-config,
 }:
 let
   # Workaround for RustRover being unable to find `clippy` without `rustup`
@@ -31,6 +33,8 @@ mkShell {
     nixd
     just
     browser-sync
+    openssl
+    pkg-config
   ];
 
   shellHook = ''
