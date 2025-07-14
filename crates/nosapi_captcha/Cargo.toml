@@ -1,0 +1,32 @@
+[package]
+name = "nosapi_captcha"
+version = "0.1.0"
+description = "An HTTP client for solving Gameforge's custom captcha implementation."
+keywords = ["nostale", "nosapi", "gameforge", "captcha"]
+categories = ["api-bindings"]
+license-file = "LICENSE"
+readme = "README.md"
+repository = "https://github.com/zakuciael/nosapi"
+homepage = "https://github.com/zakuciael/nosapi"
+documentation = "https://docs.rs/nosapi_captcha/"
+edition.workspace = true
+authors.workspace = true
+
+[features]
+default = ["default-tls"]
+
+default-tls = ["reqwest/default-tls"]
+native-tls = ["reqwest/native-tls"]
+rustls-tls = ["reqwest/rustls-tls"]
+
+[dependencies]
+bon = "3.6.3"
+thiserror = "2.0.12"
+rand = "0.9.1"
+futures = "0.3.31"
+tracing = "0.1.41"
+pluralizer = "0.5.0"
+chrono = { version = "0.4.41", features = ["serde"] }
+serde = { version = "1.0.219", features = ["derive"] }
+reqwest = { version = "0.12.19", default-features = false, features = ["json"] }
+bytes = "1.10.1"
