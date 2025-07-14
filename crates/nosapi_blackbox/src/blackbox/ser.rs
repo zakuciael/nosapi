@@ -1,5 +1,4 @@
-use crate::blackbox::Blackbox;
-use crate::constants::URI_COMPONENT_SET;
+use crate::{blackbox::Blackbox, constants::URI_COMPONENT_SET};
 use base64::Engine;
 use serde::{Serialize, Serializer};
 

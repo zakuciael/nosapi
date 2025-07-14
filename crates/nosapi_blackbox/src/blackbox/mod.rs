@@ -112,9 +112,7 @@ impl Blackbox {
 
 #[cfg(test)]
 mod tests {
-  use crate::blackbox::Blackbox;
-  use crate::fingerprint::Fingerprint;
-  use crate::vector::VectorString;
+  use crate::{blackbox::Blackbox, fingerprint::Fingerprint, vector::VectorString};
   use chrono::DateTime;
   use std::str::FromStr;
 

@@ -1,6 +1,8 @@
 use crate::constants::VECTOR_STRING_LENGTH;
-use rand::distributions::{Distribution, Uniform};
-use rand::Rng;
+use rand::{
+  distributions::{Distribution, Uniform},
+  Rng,
+};
 
 fn random_ascii_generator() -> Uniform<u8> {
   Uniform::new(32, 126)

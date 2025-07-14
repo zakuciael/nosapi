@@ -1,5 +1,4 @@
-use rand::rngs::StdRng;
-use rand::SeedableRng;
+use rand::{rngs::StdRng, SeedableRng};
 use std::cell::Cell;
 
 thread_local! {

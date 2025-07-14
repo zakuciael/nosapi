@@ -54,7 +54,7 @@ options = [
   "--edition",
   "2021",
   "--config",
-  "skip_children=true",
+  "imports_granularity=crate",
 ]
 
 [formatter.statix]

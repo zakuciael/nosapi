@@ -1,8 +1,9 @@
-use crate::blackbox::Blackbox;
-use crate::fingerprint::Fingerprint;
+use crate::{blackbox::Blackbox, fingerprint::Fingerprint};
 use base64::Engine;
-use serde::de::{Error, Visitor};
-use serde::{Deserialize, Deserializer};
+use serde::{
+  de::{Error, Visitor},
+  Deserialize, Deserializer,
+};
 use serde_tuple_explicit::DeserializeTuple;
 use std::fmt::Formatter;
 

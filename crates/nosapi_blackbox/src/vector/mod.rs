@@ -1,15 +1,16 @@
 //! Implementation of the `vector`
 //! string used to identity the modification time of the `blackbox` string.
 
-use crate::utils;
-use crate::utils::generate_vector_string;
+use crate::{utils, utils::generate_vector_string};
 use bon::bon;
 use chrono::{DateTime, TimeDelta};
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Display, Formatter};
-use std::ops::Add;
-use std::str::FromStr;
-use std::string::FromUtf8Error;
+use std::{
+  fmt::{Debug, Display, Formatter},
+  ops::Add,
+  str::FromStr,
+  string::FromUtf8Error,
+};
 
 #[cfg(test)]
 use crate::mock::chrono::Utc;
@@ -120,10 +121,11 @@ impl From<&str> for VectorString {
 
 #[cfg(test)]
 mod tests {
-  use crate::mock::chrono::set_timestamp;
-  use crate::mock::rand::set_seed;
-  use crate::utils::generate_vector_string;
-  use crate::vector::VectorString;
+  use crate::{
+    mock::{chrono::set_timestamp, rand::set_seed},
+    utils::generate_vector_string,
+    vector::VectorString,
+  };
   use chrono::{DateTime, Utc};
 
   #[rstest::fixture]

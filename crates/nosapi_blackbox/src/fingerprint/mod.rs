@@ -3,14 +3,14 @@
 use rand::Rng;
 pub mod error;
 
-use crate::fingerprint::error::InvalidGsid;
-use crate::utils::rng_generator;
-use crate::vector::VectorString;
+use crate::{fingerprint::error::InvalidGsid, utils::rng_generator, vector::VectorString};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
-use serde_with::base64::{Base64, Standard};
-use serde_with::serde_as;
+use serde_with::{
+  base64::{Base64, Standard},
+  serde_as,
+};
 
 /// A `request` struct used when generating an encrypted `blackbox` string.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -84,8 +84,10 @@ pub struct Fingerprint {
 
 #[cfg(test)]
 mod tests {
-  use crate::fingerprint::{Fingerprint, Request};
-  use crate::vector::VectorString;
+  use crate::{
+    fingerprint::{Fingerprint, Request},
+    vector::VectorString,
+  };
   use chrono::DateTime;
   use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
   use std::str::FromStr;
