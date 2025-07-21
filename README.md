@@ -13,13 +13,14 @@
 
 ## Available crates
 
-> [!WARNING]
-> Crates with a version below `v1.0.0` are still in **development**, meaning they may often receive **breaking changes**
-> and
-> contain **experimental** features.
-> It is advised to not use them in the production environments.
+- [`nosapi_blackbox`](crates/nosapi_blackbox) - A library for generating/modifying Gameforge's "blackbox" string.
 
-- [`nosapi_blackbox`](crates/nosapi_blackbox) - A library for working with Gameforge's blackbox string.
+## Planned crates
+
+- `nosapi_captcha` - An HTTP client for solving Gameforge's custom captcha implementation.
+- `nosapi_auth` - An HTTP client for game authentication using the Gameforge's Login API.
+- `nosapi_cert_utils` - A utility library providing methods for generating data derived from the Gameforge Client's certificate.
+- `nosapi_data` - A library for unpacking and repacking NosTale's `.NOS` files
 
 ## License
 
