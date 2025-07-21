@@ -7,6 +7,15 @@ extra_changelog_sections = [
   { types = ["patch"], name = "Patch Changes" },
 ]
 
+[packages.nosapi_data]
+versioned_files = ["Cargo.lock", "crates/nosapi_data/Cargo.toml"]
+changelog = "crates/nosapi_data/CHANGELOG.md"
+extra_changelog_sections = [
+  { types = ["major"], name = "Major Changes" },
+  { types = ["minor"], name = "Minor Changes" },
+  { types = ["patch"], name = "Patch Changes" },
+]
+
 [github]
 owner = "zakuciael"
 repo = "nosapi"

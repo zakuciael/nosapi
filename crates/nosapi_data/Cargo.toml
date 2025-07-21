@@ -1,0 +1,15 @@
+[package]
+name = "nosapi_data"
+version = "0.1.0"
+description = "A library for unpacking and repacking NosTale's .NOS files"
+keywords = ["nostale", "nosapi", "nos-files"]
+categories = ["parsing", "parser-implementations"]
+license-file = "LICENSE"
+readme = "README.md"
+repository = "https://github.com/zakuciael/nosapi"
+homepage = "https://github.com/zakuciael/nosapi"
+documentation = "https://docs.rs/nosapi_data/"
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]

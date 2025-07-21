@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/nosapi_blackbox"]
+members = ["crates/nosapi_blackbox", "crates/nosapi_data"]
 
 [workspace.package]
 edition = "2021"
