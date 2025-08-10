@@ -1,54 +1,40 @@
+mod error;
 mod file;
 
-pub use self::TextFile;
-pub use file::*;
-
-use crate::{error, helpers::impl_into_iter, traits};
-use byteorder::{LittleEndian, ReadBytesExt};
+use super::traits;
+use crate::macros::read;
+use error_stack::ResultExt;
 use std::io::{Read, Seek};
 
+pub use error::ArchiveError;
+pub use file::File;
+
 #[derive(Debug)]
-pub struct TextArchive {
-  files: Vec<TextFile>,
+pub struct Archive {
+  files: Vec<File>,
 }
 
-impl TextArchive {
-  pub fn files(&self) -> &[TextFile] {
+impl Archive {
+  pub fn files(&self) -> &[File] {
     &self.files
   }
-
-  pub fn file_count(&self) -> usize {
-    self.files.len()
-  }
-
-  pub fn find_file_by_id(&self, id: u32) -> Option<&TextFile> {
-    self.files.iter().find(|f| f.id() == id)
-  }
-
-  pub fn find_file_by_name(&self, name: &str) -> Option<&TextFile> {
-    self.files.iter().find(|f| f.name() == name)
-  }
 }
 
-impl traits::Reader for TextArchive {
-  fn from_reader<R: Read + Seek>(reader: &mut R) -> error::Result<Self>
+impl traits::ArchiveReader for Archive {
+  type Error = ArchiveError;
+
+  fn from_reader<R>(reader: &mut R) -> error_stack::Result<Self, Self::Error>
   where
+    R: Read + Seek,
     Self: Sized,
   {
-    let file_count = reader.read_u32::<LittleEndian>()?;
+    let file_count = read!(reader, file_count, u32).change_context(ArchiveError)?;
     let mut files = Vec::with_capacity(file_count as usize);
 
     for _ in 0..file_count {
-      files.push(TextFile::from_reader(reader)?);
+      files.push(File::read(reader).change_context(ArchiveError)?);
     }
 
     Ok(Self { files })
   }
-}
-
-impl_into_iter! {
-  ty: TextArchive,
-  iter: Vec<TextFile>,
-  item: TextFile,
-  expr: |self| self.files.into_iter()
 }

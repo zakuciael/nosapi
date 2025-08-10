@@ -1,6 +1,7 @@
-use crate::{error, traits};
+use crate::macros::read;
 use byteorder::{LittleEndian, ReadBytesExt};
 use encoding_rs::Encoding;
+use error_stack::ResultExt;
 use lazy_static::lazy_static;
 use regex::Regex;
 use size::Size;
@@ -14,16 +15,16 @@ lazy_static! {
     Regex::new(r"^_code_(\w{2})_\w*\.txt$").expect("Invalid regex pattern for encoding detection");
 }
 
+const DECRYPT_ARRAY: [u8; 16] = [
+  0x00, 0x20, 0x2D, 0x2E, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x0A, 0x00,
+];
+
 #[derive(derive_more::Debug, derive_more::Display)]
 #[display("{}", self.content())]
-pub struct TextFile {
+pub struct File {
   id: u32,
   name: String,
-  // FIXME: Implement writing archive files
-  #[debug(skip)]
-  _file_type: TextFileType,
-  #[debug(skip)]
-  encoding: &'static Encoding,
+  dat: bool,
   #[debug("{}", Size::from_bytes(*file_size))]
   file_size: u32,
   #[debug("{:?}", self.content())]
@@ -32,7 +33,7 @@ pub struct TextFile {
   raw_content: Vec<u8>,
 }
 
-impl TextFile {
+impl File {
   pub fn id(&self) -> u32 {
     self.id
   }
@@ -41,95 +42,72 @@ impl TextFile {
     &self.name
   }
 
-  pub fn size(&self) -> u32 {
+  pub fn is_dat(&self) -> bool {
+    self.dat
+  }
+
+  pub fn file_size(&self) -> u32 {
     self.file_size
   }
 
   pub fn content(&self) -> &str {
-    self
-      .content
-      .get_or_init(|| self.encoding.decode(&self.raw_content).0.into_owned())
+    self.content.get_or_init(|| {
+      let encoding = get_encoding(&self.name);
+      encoding.decode(&self.raw_content).0.into_owned()
+    })
   }
 
   pub fn raw(&self) -> &[u8] {
     &self.raw_content
   }
 
-  pub fn encoding(&self) -> &'static Encoding {
-    self.encoding
-  }
-}
-
-impl traits::Reader for TextFile {
-  fn from_reader<R: Read + Seek>(reader: &mut R) -> error::Result<Self>
+  pub(crate) fn read<R>(reader: &mut R) -> error_stack::Result<Self, crate::error::ReadError>
   where
-    Self: Sized,
+    R: Read + Seek,
   {
-    let id = reader.read_u32::<LittleEndian>()?;
+    let id = read!(reader, id, u32)?;
 
     let name = {
-      let size = reader.read_u32::<LittleEndian>()?;
+      let size = read!(reader, name_size, u32)?;
       let mut buf = vec![0x0; size as usize];
-      reader.read_exact(&mut buf)?;
+      read!(reader, name, buf)?;
 
       String::from_utf8_lossy(&buf).into_owned()
     };
 
-    let file_type = {
-      let raw = reader.read_u32::<LittleEndian>()?;
+    let is_dat = read!(reader, is_dat, u32)? != 0;
+    let file_size = read!(reader, file_size, u32)?;
 
-      match raw {
-        0 => TextFileType::LST,
-        1 => TextFileType::DAT,
-        unknown => TextFileType::Unknown(unknown),
-      }
-    };
-
-    let file_size = reader.read_u32::<LittleEndian>()?;
-    let encoding = get_encoding(&name);
-
-    let content = {
+    let raw_content = {
       let mut buf = vec![0x0; file_size as usize];
-      reader.read_exact(&mut buf)?;
 
-      file_type.decrypt(buf)?
+      if file_size != 0 {
+        read!(reader, content, buf)?;
+
+        if is_dat || name.ends_with(".dat") {
+          Self::decrypt_dat(buf)
+        } else {
+          Self::decrypt_lst(buf)
+        }
+        .change_context(crate::error::ReadError(
+          "Failed to decrypt the content".to_string(),
+        ))?
+      } else {
+        buf
+      }
     };
 
     Ok(Self {
       id,
       name,
-      _file_type: file_type,
-      encoding,
+      dat: is_dat,
       file_size,
-      content: Default::default(),
-      raw_content: content,
+      content: OnceCell::new(),
+      raw_content,
     })
   }
-}
 
-#[allow(clippy::upper_case_acronyms)]
-#[allow(dead_code)]
-#[derive(Debug)]
-enum TextFileType {
-  DAT,
-  LST,
-  Unknown(u32),
-}
-
-impl TextFileType {
-  const DECRYPT_ARRAY: [u8; 16] = [
-    0x00, 0x20, 0x2D, 0x2E, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x0A, 0x00,
-  ];
-
-  pub fn decrypt(&self, data: Vec<u8>) -> error::Result<Vec<u8>> {
-    match self {
-      TextFileType::DAT => self.decrypt_dat(data),
-      TextFileType::LST => self.decrypt_lst(data),
-      TextFileType::Unknown(_) => Ok(data),
-    }
-  }
-
-  fn decrypt_lst(&self, data: Vec<u8>) -> error::Result<Vec<u8>> {
+  fn decrypt_lst(data: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
     let mut reader = Cursor::new(&data);
     let line_count = reader.read_u32::<LittleEndian>()?;
 
@@ -153,7 +131,7 @@ impl TextFileType {
     Ok(result)
   }
 
-  fn decrypt_dat(&self, data: Vec<u8>) -> error::Result<Vec<u8>> {
+  fn decrypt_dat(data: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
     // Reserve at least 2x more bytes then the `data.len()`
     let mut result: Vec<u8> = Vec::with_capacity(data.len() * 2);
     let mut index = 0;
@@ -170,9 +148,9 @@ impl TextFileType {
       let is_compressed = byte & 0x80 != 0;
 
       index = if is_compressed {
-        self.process_compressed_data(&data, index, byte_count, &mut result)
+        Self::process_compressed_data(&data, index, byte_count, &mut result)
       } else {
-        self.process_uncompressed_data(&data, index, byte_count, &mut result)
+        Self::process_uncompressed_data(&data, index, byte_count, &mut result)
       }
     }
 
@@ -180,7 +158,6 @@ impl TextFileType {
   }
 
   fn process_compressed_data(
-    &self,
     data: &[u8],
     mut index: usize,
     mut byte_count: u8,
@@ -190,12 +167,12 @@ impl TextFileType {
       let byte = data[index];
       index += 1;
 
-      let first_byte = Self::DECRYPT_ARRAY[((byte & 0xF0) >> 4) as usize];
+      let first_byte = DECRYPT_ARRAY[((byte & 0xF0) >> 4) as usize];
       result.push(first_byte);
       byte_count -= 1;
 
       if byte_count > 0 {
-        let second_byte = Self::DECRYPT_ARRAY[(byte & 0xF) as usize];
+        let second_byte = DECRYPT_ARRAY[(byte & 0xF) as usize];
 
         if second_byte == 0 {
           break;
@@ -210,7 +187,6 @@ impl TextFileType {
   }
 
   fn process_uncompressed_data(
-    &self,
     data: &[u8],
     index: usize,
     byte_count: u8,
