@@ -1,4 +1,4 @@
-use rand::{rngs::StdRng, SeedableRng};
+use rand::{SeedableRng, rngs::StdRng};
 use std::cell::Cell;
 
 thread_local! {
@@ -6,9 +6,9 @@ thread_local! {
 }
 
 pub fn set_seed(seed: u64) {
-  RAND_SEED.set(seed)
+    RAND_SEED.set(seed)
 }
 
 pub fn get_rng() -> StdRng {
-  RAND_SEED.with(|seed| StdRng::seed_from_u64(seed.get()))
+    RAND_SEED.with(|seed| StdRng::seed_from_u64(seed.get()))
 }

@@ -8,94 +8,94 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
 use serde_with::{
-  base64::{Base64, Standard},
-  serde_as,
+    base64::{Base64, Standard},
+    serde_as,
 };
 
 /// A `request` struct used when generating an encrypted `blackbox` string.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Request {
-  features: Vec<u64>,
-  #[serde(rename = "installation")]
-  installation_id: String,
-  session: String,
+    features: Vec<u64>,
+    #[serde(rename = "installation")]
+    installation_id: String,
+    session: String,
 }
 
 impl Request {
-  /// Create a new `Request` struct from `gsid` and `installation_id`
-  ///
-  /// # Errors
-  /// This method can error whenever the provided `gsid` is invalid.
-  pub fn new(gsid: String, installation_id: String) -> Result<Self, InvalidGsid> {
-    let features = rng_generator().gen_range(1..9999);
-    let session = {
-      let index = gsid.rfind("-").ok_or(InvalidGsid)?;
-      let session = &gsid[index + 1..];
-      session.to_string()
-    };
+    /// Create a new `Request` struct from `gsid` and `installation_id`
+    ///
+    /// # Errors
+    /// This method can error whenever the provided `gsid` is invalid.
+    pub fn new(gsid: String, installation_id: String) -> Result<Self, InvalidGsid> {
+        let features = rng_generator().gen_range(1..9999);
+        let session = {
+            let index = gsid.rfind("-").ok_or(InvalidGsid)?;
+            let session = &gsid[index + 1..];
+            session.to_string()
+        };
 
-    Ok(Self {
-      features: vec![features],
-      installation_id,
-      session,
-    })
-  }
+        Ok(Self {
+            features: vec![features],
+            installation_id,
+            session,
+        })
+    }
 }
 
 /// A `fingerprint` struct containing information needed to fingerprint users.
 #[serde_as]
 #[derive(Serialize, SerializeTuple, Deserialize, DeserializeTuple, Clone, PartialEq, Debug)]
 pub struct Fingerprint {
-  pub version: u32,
-  pub timezone: String,
-  pub do_not_track: bool,
-  pub browser_engine: String,
-  pub os_name: String,
-  pub browser_name: String,
-  pub vendor: String,
-  pub memory: u32,
-  pub concurrency: u32,
-  pub languages: String,
-  pub plugins_hash: String,
-  pub gpu: String,
-  pub fonts_hash: String,
-  pub audio_context_hash: String,
-  pub width: u32,
-  pub height: u32,
-  pub color_depth: u32,
-  pub video_codecs_hash: String,
-  pub audio_codecs_hash: String,
-  pub media_devices_hash: String,
-  pub permissions_hash: String,
-  pub audio_fingerprint: f64,
-  pub webgl_fingerprint: String,
-  pub canvas_fingerprint: u32,
-  pub creation: DateTime<Utc>,
-  pub game: String,
-  pub delta: u32,
-  pub os_version: Option<String>,
-  #[serde_as(as = "Base64<Standard>")]
-  pub vector: VectorString,
-  pub user_agent: String,
-  pub server_time: DateTime<Utc>,
-  #[serde(default)]
-  pub request: Option<Request>,
+    pub version: u32,
+    pub timezone: String,
+    pub do_not_track: bool,
+    pub browser_engine: String,
+    pub os_name: String,
+    pub browser_name: String,
+    pub vendor: String,
+    pub memory: u32,
+    pub concurrency: u32,
+    pub languages: String,
+    pub plugins_hash: String,
+    pub gpu: String,
+    pub fonts_hash: String,
+    pub audio_context_hash: String,
+    pub width: u32,
+    pub height: u32,
+    pub color_depth: u32,
+    pub video_codecs_hash: String,
+    pub audio_codecs_hash: String,
+    pub media_devices_hash: String,
+    pub permissions_hash: String,
+    pub audio_fingerprint: f64,
+    pub webgl_fingerprint: String,
+    pub canvas_fingerprint: u32,
+    pub creation: DateTime<Utc>,
+    pub game: String,
+    pub delta: u32,
+    pub os_version: Option<String>,
+    #[serde_as(as = "Base64<Standard>")]
+    pub vector: VectorString,
+    pub user_agent: String,
+    pub server_time: DateTime<Utc>,
+    #[serde(default)]
+    pub request: Option<Request>,
 }
 
 #[cfg(test)]
 mod tests {
-  use crate::{
-    fingerprint::{Fingerprint, Request},
-    vector::VectorString,
-  };
-  use chrono::DateTime;
-  use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
-  use std::str::FromStr;
+    use crate::{
+        fingerprint::{Fingerprint, Request},
+        vector::VectorString,
+    };
+    use chrono::DateTime;
+    use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
+    use std::str::FromStr;
 
-  #[rstest::fixture]
-  //noinspection DuplicatedCode, SpellCheckingInspection
-  fn fingerprint_inst() -> Fingerprint {
-    Fingerprint {
+    #[rstest::fixture]
+    //noinspection DuplicatedCode, SpellCheckingInspection
+    fn fingerprint_inst() -> Fingerprint {
+        Fingerprint {
       version: 9,
       timezone: "Europe/Warsaw".to_string(),
       do_not_track: false,
@@ -132,11 +132,11 @@ mod tests {
       server_time: FromStr::from_str("2024-12-28T12:56:15.000Z").unwrap(),
       request: None,
     }
-  }
+    }
 
-  #[rstest::fixture]
-  fn fingerprint_json() -> String {
-    r#"{
+    #[rstest::fixture]
+    fn fingerprint_json() -> String {
+        r#"{
   "version": 9,
   "timezone": "Europe/Warsaw",
   "do_not_track": false,
@@ -170,11 +170,11 @@ mod tests {
   "server_time": "2024-12-28T12:56:15Z",
   "request": null
 }"#.to_string()
-  }
+    }
 
-  #[rstest::fixture]
-  fn fingerprint_array() -> String {
-    r#"[
+    #[rstest::fixture]
+    fn fingerprint_array() -> String {
+        r#"[
   9,
   "Europe/Warsaw",
   false,
@@ -208,82 +208,85 @@ mod tests {
   "2024-12-28T12:56:15Z",
   null
 ]"#.to_string()
-  }
-
-  #[rstest::fixture]
-  fn request_inst(installation_id: String) -> Request {
-    Request {
-      features: vec![7734],
-      session: "129fae8a8e5c".to_string(),
-      installation_id,
     }
-  }
 
-  #[rstest::fixture]
-  fn gsid() -> String {
-    "4fcf4367-1a2e-48b8-9b9a-129fae8a8e5c".to_string()
-  }
+    #[rstest::fixture]
+    fn request_inst(installation_id: String) -> Request {
+        Request {
+            features: vec![7734],
+            session: "129fae8a8e5c".to_string(),
+            installation_id,
+        }
+    }
 
-  #[rstest::fixture]
-  fn installation_id() -> String {
-    "639edac7-9b6e-454e-80d9-545a5e299860".to_string()
-  }
+    #[rstest::fixture]
+    fn gsid() -> String {
+        "4fcf4367-1a2e-48b8-9b9a-129fae8a8e5c".to_string()
+    }
 
-  #[rstest::rstest]
-  fn should_correctly_serialize_to_json(fingerprint_inst: Fingerprint, fingerprint_json: String) {
-    let res = serde_json::to_string_pretty(&fingerprint_inst);
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), fingerprint_json);
-  }
+    #[rstest::fixture]
+    fn installation_id() -> String {
+        "639edac7-9b6e-454e-80d9-545a5e299860".to_string()
+    }
 
-  #[rstest::rstest]
-  fn should_correctly_serialize_to_array(fingerprint_inst: Fingerprint, fingerprint_array: String) {
-    let res = {
-      let mut buf = Vec::new();
-      let mut serializer = serde_json::Serializer::pretty(&mut buf);
+    #[rstest::rstest]
+    fn should_correctly_serialize_to_json(fingerprint_inst: Fingerprint, fingerprint_json: String) {
+        let res = serde_json::to_string_pretty(&fingerprint_inst);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), fingerprint_json);
+    }
 
-      fingerprint_inst
-        .serialize_tuple(&mut serializer)
-        .map(|_| unsafe { String::from_utf8_unchecked(buf) })
-    };
+    #[rstest::rstest]
+    fn should_correctly_serialize_to_array(
+        fingerprint_inst: Fingerprint,
+        fingerprint_array: String,
+    ) {
+        let res = {
+            let mut buf = Vec::new();
+            let mut serializer = serde_json::Serializer::pretty(&mut buf);
 
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), fingerprint_array);
-  }
+            fingerprint_inst
+                .serialize_tuple(&mut serializer)
+                .map(|_| unsafe { String::from_utf8_unchecked(buf) })
+        };
 
-  #[rstest::rstest]
-  fn should_correctly_deserialize_from_json(
-    fingerprint_json: String,
-    fingerprint_inst: Fingerprint,
-  ) {
-    let res = serde_json::from_str::<Fingerprint>(&fingerprint_json);
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), fingerprint_inst);
-  }
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), fingerprint_array);
+    }
 
-  #[rstest::rstest]
-  fn should_correctly_deserialize_from_array(
-    fingerprint_array: String,
-    fingerprint_inst: Fingerprint,
-  ) {
-    let res = {
-      let mut deserializer = serde_json::Deserializer::from_str(&fingerprint_array);
-      Fingerprint::deserialize_tuple(&mut deserializer)
-    };
+    #[rstest::rstest]
+    fn should_correctly_deserialize_from_json(
+        fingerprint_json: String,
+        fingerprint_inst: Fingerprint,
+    ) {
+        let res = serde_json::from_str::<Fingerprint>(&fingerprint_json);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), fingerprint_inst);
+    }
 
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), fingerprint_inst);
-  }
+    #[rstest::rstest]
+    fn should_correctly_deserialize_from_array(
+        fingerprint_array: String,
+        fingerprint_inst: Fingerprint,
+    ) {
+        let res = {
+            let mut deserializer = serde_json::Deserializer::from_str(&fingerprint_array);
+            Fingerprint::deserialize_tuple(&mut deserializer)
+        };
 
-  #[rstest::rstest]
-  fn should_correctly_create_request_struct(
-    gsid: String,
-    installation_id: String,
-    request_inst: Request,
-  ) {
-    let res = Request::new(gsid, installation_id.clone());
-    assert!(res.is_ok());
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), fingerprint_inst);
+    }
 
-    assert_eq!(res.unwrap(), request_inst);
-  }
+    #[rstest::rstest]
+    fn should_correctly_create_request_struct(
+        gsid: String,
+        installation_id: String,
+        request_inst: Request,
+    ) {
+        let res = Request::new(gsid, installation_id.clone());
+        assert!(res.is_ok());
+
+        assert_eq!(res.unwrap(), request_inst);
+    }
 }
