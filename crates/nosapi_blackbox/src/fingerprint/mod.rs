@@ -1,6 +1,6 @@
 //! Implementation of the `fingerprint` struct found in the `blackbox` string.
 
-use rand::Rng;
+use rand::RngExt;
 pub mod error;
 
 use crate::{fingerprint::error::InvalidGsid, utils::rng_generator, vector::VectorString};
@@ -27,7 +27,7 @@ impl Request {
     /// # Errors
     /// This method can error whenever the provided `gsid` is invalid.
     pub fn new(gsid: String, installation_id: String) -> Result<Self, InvalidGsid> {
-        let features = rng_generator().gen_range(1..9999);
+        let features = rng_generator().random_range(1..9999);
         let session = {
             let index = gsid.rfind("-").ok_or(InvalidGsid)?;
             let session = &gsid[index + 1..];
@@ -213,7 +213,7 @@ mod tests {
     #[rstest::fixture]
     fn request_inst(installation_id: String) -> Request {
         Request {
-            features: vec![7734],
+            features: vec![7310],
             session: "129fae8a8e5c".to_string(),
             installation_id,
         }
