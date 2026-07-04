@@ -9,11 +9,11 @@ use crate::fingerprint::Fingerprint;
 use base64::Engine;
 use sha2::Digest;
 
-fn create_encryption_key(gsid: String, account_id: String) -> Vec<u8> {
+pub(crate) fn create_encryption_key(gsid: String, account_id: String) -> Vec<u8> {
     let key = format!("{}-{}", gsid, account_id);
     let hash = sha2::Sha512::digest(&key);
 
-    format!("{:x}", hash).into()
+    hex::encode(hash).into()
 }
 
 fn xor(data: &[u8], key: &[u8]) -> Vec<u8> {
@@ -111,7 +111,11 @@ impl Blackbox {
 
 #[cfg(test)]
 mod tests {
-    use crate::{blackbox::Blackbox, fingerprint::Fingerprint, vector::VectorString};
+    use crate::{
+        blackbox::{Blackbox, create_encryption_key},
+        fingerprint::Fingerprint,
+        vector::VectorString,
+    };
     use chrono::DateTime;
     use std::str::FromStr;
 
@@ -219,5 +223,12 @@ mod tests {
 
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), blackbox_inst);
+    }
+
+    #[rstest::rstest]
+    fn should_generate_correct_encryption_key(gsid: String, account_id: String) {
+        let key = create_encryption_key(gsid, account_id);
+
+        assert_eq!(key, "e068ac36cc43f96bfba7f8923d71eb6bee3e5e2a3ae6da000758786ce9d96a047367b4148fc871a11a76060c34820d31e35368e8136bc2d802bde0488c2d185e".as_bytes());
     }
 }
