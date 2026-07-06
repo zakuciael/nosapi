@@ -76,6 +76,8 @@ in
     cargo-msrv
     release-plz
     config.languages.rust.toolchainPackage
+    pkg-config
+    openssl
   ];
 
   languages = {
