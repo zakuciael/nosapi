@@ -1,0 +1,36 @@
+---
+source: crates/nosapi_blackbox/src/fingerprint/mod.rs
+expression: fingerprint_inst
+---
+{
+  "version": 12,
+  "timezone": "Europe/Budapest",
+  "os_name": "Windows",
+  "browser_name": "Chrome",
+  "vendor": "Google Inc.",
+  "memory": 8,
+  "concurrency": 12,
+  "languages": "en-US,en",
+  "plugins_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "gpu": "Google Inc.,ANGLE (AMD Radeon RX 9070 XT (RADV GFX1201) Direct3D11 vs_5_0 ps_5_0)",
+  "fonts_hash": "3378072d2ab335e8429fc4210100ee63421bd734d70f309d4e83717b1dd22cb0",
+  "audio_context_hash": "d9af7aa1d00f202e8291fe49b9344f69746635eea53e7eace68c10f302cc933a",
+  "width": 2560,
+  "height": 1440,
+  "video_codecs_hash": "ea2c39c5eca488bd7ee0a1d7ce6b5600da5f36a7c8aa89bdeb078690fe8950e6",
+  "audio_codecs_hash": "456687e4e0029125c0b73edf391fa02e5b8906ef5bc3ac2b34ebe93ba04c130a",
+  "media_devices_hash": "ac09c2bd52c8b03e9e216ca814691ae43a4c396516a717a08c147de888d3395f",
+  "permissions_hash": "27f243aa0ac84a576f3009806c3b13614a4efb01a9a42420041da0b72ec4c9b6",
+  "audio_fingerprint": 124.0434474653739,
+  "webgl_fingerprint": "fbfb9458d00f4ec2ffab13f36ab3a278a3a7d47f97432c9479f64519c33dd158",
+  "canvas_fingerprint": 1041840910,
+  "creation": "2026-07-04T09:44:25.852Z",
+  "game": "jt470uohwsy0pjddquonw5ufga8",
+  "delta": 280,
+  "os_version": "10",
+  "vector": "ZHNBRW8mbndse1ItWiZDKlEmNTRLLV9HdS9gX1tgRVBqcStWIlBcOVU3XTBXfC1ST3BcI0Ncb0ghSSp3enclTXpbc0IwNCR2SG4xdmFOWDpYa2pVQ2xUQH16MjdBUCNgbig9NiAxNzgzMTU4MjY0NjIw",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
+  "server_time": "2026-07-04T09:44:25Z",
+  "request": null,
+  "browser_env_mask": 73728
+}

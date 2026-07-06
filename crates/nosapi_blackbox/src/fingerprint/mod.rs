@@ -1,8 +1,11 @@
 //! Implementation of the `fingerprint` struct found in the `blackbox` string.
 
 use rand::RngExt;
-pub mod error;
 
+pub mod error;
+pub mod version;
+
+use crate::fingerprint::version::FingerprintVersion;
 use crate::{fingerprint::error::InvalidGsid, utils::rng_generator, vector::VectorString};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -46,10 +49,8 @@ impl Request {
 #[serde_as]
 #[derive(Serialize, SerializeTuple, Deserialize, DeserializeTuple, Clone, PartialEq, Debug)]
 pub struct Fingerprint {
-    pub version: u32,
+    pub version: FingerprintVersion,
     pub timezone: String,
-    pub do_not_track: bool,
-    pub browser_engine: String,
     pub os_name: String,
     pub browser_name: String,
     pub vendor: String,
@@ -62,7 +63,6 @@ pub struct Fingerprint {
     pub audio_context_hash: String,
     pub width: u32,
     pub height: u32,
-    pub color_depth: u32,
     pub video_codecs_hash: String,
     pub audio_codecs_hash: String,
     pub media_devices_hash: String,
@@ -78,17 +78,17 @@ pub struct Fingerprint {
     pub vector: VectorString,
     pub user_agent: String,
     pub server_time: DateTime<Utc>,
-    #[serde(default)]
     pub request: Option<Request>,
+    pub browser_env_mask: u32,
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        fingerprint::{Fingerprint, Request},
-        vector::VectorString,
-    };
+    use crate::fingerprint::Request;
+    use crate::{Fingerprint, VectorString};
     use chrono::DateTime;
+    use serde::Serialize;
+    use serde::Serializer;
     use serde_tuple_explicit::{DeserializeTuple, SerializeTuple};
     use std::str::FromStr;
 
@@ -96,118 +96,112 @@ mod tests {
     //noinspection DuplicatedCode, SpellCheckingInspection
     fn fingerprint_inst() -> Fingerprint {
         Fingerprint {
-      version: 9,
-      timezone: "Europe/Warsaw".to_string(),
-      do_not_track: false,
-      browser_engine: "Blink".to_string(),
-      os_name: "Linux".to_string(),
-      browser_name: "Chrome".to_string(),
-      vendor: "Google Inc.".to_string(),
-      memory: 8,
-      concurrency: 12,
-      languages: "en-US,pl,en".to_string(),
-      plugins_hash: "f473d473013d58cee78732e974dd4af2e8d0105449c384658cbf1505e40ede50".to_string(),
-      gpu: "Google Inc. (AMD),ANGLE (AMD, AMD Radeon RX 5700 XT (radeonsi navi10 LLVM 18.1.8), OpenGL ES 3.2)".to_string(),
-      fonts_hash: "6ab3b6cf30d164dd769f1c911cbf6a2fef1e540ecf594b5020f55de0bcfcd844".to_string(),
-      audio_context_hash: "d9af7aa1d00f202e8291fe49b9344f69746635eea53e7eace68c10f302cc933a".to_string(),
-      width: 1920,
-      height: 1080,
-      color_depth: 24,
-      video_codecs_hash: "3767a83c51cda390de10e37350a640d8be0af56991b5f65b081809a6d29df03f".to_string(),
-      audio_codecs_hash: "5a0ef26fd9ff096689feaad0d49fb8551822ea6b3be74a02794c2aa10ead141f".to_string(),
-      media_devices_hash: "6aeb6412b24ba7dd08653eb50179026602499917a6400174f9ad7e9bef78abf2".to_string(),
-      permissions_hash: "211043d72f4d0b15e2ffab9ecde16f7c4b8e390c7bfb40e72fd2ecd73aa2c3e5".to_string(),
-      audio_fingerprint: 124.04347527516074,
-      webgl_fingerprint: "d7c53de05c6aea8d6f00d8a17865f81df0a893efb2eb6410bc747bf184234cf3".to_string(),
-      canvas_fingerprint: 1640737682,
-      creation: FromStr::from_str("2024-12-28T12:56:15.648Z").unwrap(),
-      game: "0r397uz4k9n42y0lsaeco3v0utr".to_string(),
-      delta: 320,
-      os_version: None,
-      vector: VectorString::new(
-        "jniYEuIsry 5[y,9wS+tK^C'g_`tFmUTHYw|AuQ|IP8&ZAl7uA7TxF_b.Lv8a{i_L/EO? c<KYKRC1p?sPk8o${Y|;>-9<qO'9n7".to_string(),
-        DateTime::from_timestamp_millis(1735390575328).unwrap()
-      ),
-      user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36".to_string(),
-      server_time: FromStr::from_str("2024-12-28T12:56:15.000Z").unwrap(),
-      request: None,
-    }
+            version: 12.try_into().unwrap(),
+            timezone: "Europe/Budapest".to_string(),
+            os_name: "Windows".to_string(),
+            browser_name: "Chrome".to_string(),
+            vendor: "Google Inc.".to_string(),
+            memory: 8,
+            concurrency: 12,
+            languages: "en-US,en".to_string(),
+            plugins_hash: "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945".to_string(),
+            gpu: "Google Inc.,ANGLE (AMD Radeon RX 9070 XT (RADV GFX1201) Direct3D11 vs_5_0 ps_5_0)".to_string(),
+            fonts_hash: "3378072d2ab335e8429fc4210100ee63421bd734d70f309d4e83717b1dd22cb0".to_string(),
+            audio_context_hash: "d9af7aa1d00f202e8291fe49b9344f69746635eea53e7eace68c10f302cc933a".to_string(),
+            width: 2560,
+            height: 1440,
+            video_codecs_hash: "ea2c39c5eca488bd7ee0a1d7ce6b5600da5f36a7c8aa89bdeb078690fe8950e6".to_string(),
+            audio_codecs_hash: "456687e4e0029125c0b73edf391fa02e5b8906ef5bc3ac2b34ebe93ba04c130a".to_string(),
+            media_devices_hash: "ac09c2bd52c8b03e9e216ca814691ae43a4c396516a717a08c147de888d3395f".to_string(),
+            permissions_hash: "27f243aa0ac84a576f3009806c3b13614a4efb01a9a42420041da0b72ec4c9b6".to_string(),
+            audio_fingerprint: 124.0434474653739,
+            webgl_fingerprint: "fbfb9458d00f4ec2ffab13f36ab3a278a3a7d47f97432c9479f64519c33dd158".to_string(),
+            canvas_fingerprint: 1041840910,
+            creation: FromStr::from_str("2026-07-04T09:44:25.852Z").unwrap(),
+            game: "jt470uohwsy0pjddquonw5ufga8".to_string(),
+            delta: 280,
+            os_version: Some("10".to_string()),
+            vector: VectorString::new(
+                "dsAEo&nwl{R-Z&C*Q&54K-_Gu/`_[`EPjq+V\"P\\9U7]0W|-ROp\\#C\\oH!I*wzw%Mz[sB04$vHn1vaNX:XkjUClT@}z27AP#`n(=6".to_string(),
+                DateTime::from_timestamp_millis(1783158264620).unwrap()
+            ),
+            user_agent: "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36".to_string(),
+            server_time: FromStr::from_str("2026-07-04T09:44:25Z").unwrap(),
+            request: None,
+            browser_env_mask: 73728,
+        }
     }
 
     #[rstest::fixture]
     fn fingerprint_json() -> String {
         r#"{
-  "version": 9,
-  "timezone": "Europe/Warsaw",
-  "do_not_track": false,
-  "browser_engine": "Blink",
-  "os_name": "Linux",
-  "browser_name": "Chrome",
-  "vendor": "Google Inc.",
-  "memory": 8,
-  "concurrency": 12,
-  "languages": "en-US,pl,en",
-  "plugins_hash": "f473d473013d58cee78732e974dd4af2e8d0105449c384658cbf1505e40ede50",
-  "gpu": "Google Inc. (AMD),ANGLE (AMD, AMD Radeon RX 5700 XT (radeonsi navi10 LLVM 18.1.8), OpenGL ES 3.2)",
-  "fonts_hash": "6ab3b6cf30d164dd769f1c911cbf6a2fef1e540ecf594b5020f55de0bcfcd844",
-  "audio_context_hash": "d9af7aa1d00f202e8291fe49b9344f69746635eea53e7eace68c10f302cc933a",
-  "width": 1920,
-  "height": 1080,
-  "color_depth": 24,
-  "video_codecs_hash": "3767a83c51cda390de10e37350a640d8be0af56991b5f65b081809a6d29df03f",
-  "audio_codecs_hash": "5a0ef26fd9ff096689feaad0d49fb8551822ea6b3be74a02794c2aa10ead141f",
-  "media_devices_hash": "6aeb6412b24ba7dd08653eb50179026602499917a6400174f9ad7e9bef78abf2",
-  "permissions_hash": "211043d72f4d0b15e2ffab9ecde16f7c4b8e390c7bfb40e72fd2ecd73aa2c3e5",
-  "audio_fingerprint": 124.04347527516074,
-  "webgl_fingerprint": "d7c53de05c6aea8d6f00d8a17865f81df0a893efb2eb6410bc747bf184234cf3",
-  "canvas_fingerprint": 1640737682,
-  "creation": "2024-12-28T12:56:15.648Z",
-  "game": "0r397uz4k9n42y0lsaeco3v0utr",
-  "delta": 320,
-  "os_version": null,
-  "vector": "am5pWUV1SXNyeSA1W3ksOXdTK3RLXkMnZ19gdEZtVVRIWXd8QXVRfElQOCZaQWw3dUE3VHhGX2IuTHY4YXtpX0wvRU8/IGM8S1lLUkMxcD9zUGs4byR7WXw7Pi05PHFPJzluNyAxNzM1MzkwNTc1MzI4",
-  "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-  "server_time": "2024-12-28T12:56:15Z",
-  "request": null
-}"#.to_string()
+            "version": 12,
+            "timezone": "Europe/Budapest",
+            "os_name": "Windows",
+            "browser_name": "Chrome",
+            "vendor": "Google Inc.",
+            "memory": 8,
+            "concurrency": 12,
+            "languages": "en-US,en",
+            "plugins_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "gpu": "Google Inc.,ANGLE (AMD Radeon RX 9070 XT (RADV GFX1201) Direct3D11 vs_5_0 ps_5_0)",
+            "fonts_hash": "3378072d2ab335e8429fc4210100ee63421bd734d70f309d4e83717b1dd22cb0",
+            "audio_context_hash": "d9af7aa1d00f202e8291fe49b9344f69746635eea53e7eace68c10f302cc933a",
+            "width": 2560,
+            "height": 1440,
+            "video_codecs_hash": "ea2c39c5eca488bd7ee0a1d7ce6b5600da5f36a7c8aa89bdeb078690fe8950e6",
+            "audio_codecs_hash": "456687e4e0029125c0b73edf391fa02e5b8906ef5bc3ac2b34ebe93ba04c130a",
+            "media_devices_hash": "ac09c2bd52c8b03e9e216ca814691ae43a4c396516a717a08c147de888d3395f",
+            "permissions_hash": "27f243aa0ac84a576f3009806c3b13614a4efb01a9a42420041da0b72ec4c9b6",
+            "audio_fingerprint": 124.0434474653739,
+            "webgl_fingerprint": "fbfb9458d00f4ec2ffab13f36ab3a278a3a7d47f97432c9479f64519c33dd158",
+            "canvas_fingerprint": 1041840910,
+            "creation": "2026-07-04T09:44:25.852Z",
+            "game": "jt470uohwsy0pjddquonw5ufga8",
+            "delta": 280,
+            "os_version": "10",
+            "vector": "ZHNBRW8mbndse1ItWiZDKlEmNTRLLV9HdS9gX1tgRVBqcStWIlBcOVU3XTBXfC1ST3BcI0Ncb0ghSSp3enclTXpbc0IwNCR2SG4xdmFOWDpYa2pVQ2xUQH16MjdBUCNgbig9NiAxNzgzMTU4MjY0NjIw",
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
+            "server_time": "2026-07-04T09:44:25Z",
+            "request": null,
+            "browser_env_mask": 73728
+        }"#.to_string()
     }
 
     #[rstest::fixture]
     fn fingerprint_array() -> String {
         r#"[
-  9,
-  "Europe/Warsaw",
-  false,
-  "Blink",
-  "Linux",
-  "Chrome",
-  "Google Inc.",
-  8,
-  12,
-  "en-US,pl,en",
-  "f473d473013d58cee78732e974dd4af2e8d0105449c384658cbf1505e40ede50",
-  "Google Inc. (AMD),ANGLE (AMD, AMD Radeon RX 5700 XT (radeonsi navi10 LLVM 18.1.8), OpenGL ES 3.2)",
-  "6ab3b6cf30d164dd769f1c911cbf6a2fef1e540ecf594b5020f55de0bcfcd844",
-  "d9af7aa1d00f202e8291fe49b9344f69746635eea53e7eace68c10f302cc933a",
-  1920,
-  1080,
-  24,
-  "3767a83c51cda390de10e37350a640d8be0af56991b5f65b081809a6d29df03f",
-  "5a0ef26fd9ff096689feaad0d49fb8551822ea6b3be74a02794c2aa10ead141f",
-  "6aeb6412b24ba7dd08653eb50179026602499917a6400174f9ad7e9bef78abf2",
-  "211043d72f4d0b15e2ffab9ecde16f7c4b8e390c7bfb40e72fd2ecd73aa2c3e5",
-  124.04347527516074,
-  "d7c53de05c6aea8d6f00d8a17865f81df0a893efb2eb6410bc747bf184234cf3",
-  1640737682,
-  "2024-12-28T12:56:15.648Z",
-  "0r397uz4k9n42y0lsaeco3v0utr",
-  320,
-  null,
-  "am5pWUV1SXNyeSA1W3ksOXdTK3RLXkMnZ19gdEZtVVRIWXd8QXVRfElQOCZaQWw3dUE3VHhGX2IuTHY4YXtpX0wvRU8/IGM8S1lLUkMxcD9zUGs4byR7WXw7Pi05PHFPJzluNyAxNzM1MzkwNTc1MzI4",
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-  "2024-12-28T12:56:15Z",
-  null
-]"#.to_string()
+            12,
+            "Europe/Budapest",
+            "Windows",
+            "Chrome",
+            "Google Inc.",
+            8,
+            12,
+            "en-US,en",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "Google Inc.,ANGLE (AMD Radeon RX 9070 XT (RADV GFX1201) Direct3D11 vs_5_0 ps_5_0)",
+            "3378072d2ab335e8429fc4210100ee63421bd734d70f309d4e83717b1dd22cb0",
+            "d9af7aa1d00f202e8291fe49b9344f69746635eea53e7eace68c10f302cc933a",
+            2560,
+            1440,
+            "ea2c39c5eca488bd7ee0a1d7ce6b5600da5f36a7c8aa89bdeb078690fe8950e6",
+            "456687e4e0029125c0b73edf391fa02e5b8906ef5bc3ac2b34ebe93ba04c130a",
+            "ac09c2bd52c8b03e9e216ca814691ae43a4c396516a717a08c147de888d3395f",
+            "27f243aa0ac84a576f3009806c3b13614a4efb01a9a42420041da0b72ec4c9b6",
+            124.0434474653739,
+            "fbfb9458d00f4ec2ffab13f36ab3a278a3a7d47f97432c9479f64519c33dd158",
+            1041840910,
+            "2026-07-04T09:44:25.852Z",
+            "jt470uohwsy0pjddquonw5ufga8",
+            280,
+            "10",
+            "ZHNBRW8mbndse1ItWiZDKlEmNTRLLV9HdS9gX1tgRVBqcStWIlBcOVU3XTBXfC1ST3BcI0Ncb0ghSSp3enclTXpbc0IwNCR2SG4xdmFOWDpYa2pVQ2xUQH16MjdBUCNgbig9NiAxNzgzMTU4MjY0NjIw",
+            "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
+            "2026-07-04T09:44:25.000Z",
+            null,
+            73728
+        ]"#.to_string()
     }
 
     #[rstest::fixture]
@@ -230,28 +224,24 @@ mod tests {
     }
 
     #[rstest::rstest]
-    fn should_correctly_serialize_to_json(fingerprint_inst: Fingerprint, fingerprint_json: String) {
-        let res = serde_json::to_string_pretty(&fingerprint_inst);
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap(), fingerprint_json);
+    fn should_correctly_serialize_to_json(fingerprint_inst: Fingerprint) {
+        insta::assert_json_snapshot!(fingerprint_inst);
     }
 
     #[rstest::rstest]
-    fn should_correctly_serialize_to_array(
-        fingerprint_inst: Fingerprint,
-        fingerprint_array: String,
-    ) {
-        let res = {
-            let mut buf = Vec::new();
-            let mut serializer = serde_json::Serializer::pretty(&mut buf);
+    fn should_correctly_serialize_to_array(fingerprint_inst: Fingerprint) {
+        struct FingerprintWrapper(Fingerprint);
 
-            fingerprint_inst
-                .serialize_tuple(&mut serializer)
-                .map(|_| unsafe { String::from_utf8_unchecked(buf) })
-        };
+        impl Serialize for FingerprintWrapper {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                self.0.serialize_tuple(serializer)
+            }
+        }
 
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap(), fingerprint_array);
+        insta::assert_json_snapshot!(FingerprintWrapper(fingerprint_inst));
     }
 
     #[rstest::rstest]
@@ -286,7 +276,6 @@ mod tests {
     ) {
         let res = Request::new(gsid, installation_id.clone());
         assert!(res.is_ok());
-
         assert_eq!(res.unwrap(), request_inst);
     }
 }
