@@ -71,6 +71,7 @@ let
 in
 {
   packages = with pkgs; [
+    cargo-insta
     cargo-nextest
     cargo-msrv
     release-plz
@@ -166,6 +167,8 @@ in
           ".devenv/*"
           "assets/*"
           ".github/*.json"
+          "*.snap"
+          "*.snap.new"
         ];
         on-unmatched = "warn";
       };

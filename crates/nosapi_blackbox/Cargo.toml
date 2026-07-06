@@ -24,4 +24,5 @@ hex = "0.4.3"
 thiserror = "2.0.19"
 
 [dev-dependencies]
+insta = { version = "1.48.0", features = ["json"] }
 rstest = "0.26.1"
