@@ -22,21 +22,65 @@ cargo add nosapi_captcha
 
 ## Usage
 
-You can either use the all-in-one `try_solve` method that will automatically do all the necessary steps needed to solve the captcha like this:
+Start with `Client::builder()` when you need the requests to use the same user agent, origin, locale, or headers as the session that received the captcha.
+
+### Best-effort automatic solving
+
+`try_solve` performs the required request sequence and then tries random answer indexes until the challenge is solved or the attempt budget is exhausted.
 
 ```rust
 use nosapi_captcha::Client;
 
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-  let client = Client::builder()
-    .user_agent("USER_AGENT_USED_WHEN_ENCOUNTERED_THE_CAPTCHA")
-    .build()?;
-  println!("{:?}", client.try_solve("CAPTCHA_CHALLENGE_ID", None).await?);
+    let client = Client::builder()
+        .user_agent("USER_AGENT_USED_WHEN_THE_CAPTCHA_WAS_CREATED")
+        .build()?;
+
+    let solved = client.try_solve("CAPTCHA_CHALLENGE_ID", None).await?;
+    println!("solved: {solved}");
+
+    Ok(())
 }
 ```
 
-Or manually using the `captcha`, `resources`, `send_answer` and `reset` methods.\
-For more information on how each of these methods works, refer to the [**docs.rs**](https://docs.rs/nosapi_captcha/) page.
+This helper does not perform image recognition. For a user-facing or deterministic solver, use the manual flow.
+
+### Manual challenge flow
+
+The Gameforge endpoint expects requests in this order:
+
+1. `captcha` fetches the challenge state.
+2. `resources` fetches the localized instructions, drag icon sprite sheet, and drop target image.
+3. `send_answer` submits the zero-based index of the selected drag icon.
+4. `reset` starts a new displayed challenge after too many failed answers.
+
+```rust
+use nosapi_captcha::{Captcha, Client};
+
+async fn submit_answer(
+    client: &Client,
+    challenge_id: &str,
+    selected_icon_index: u8,
+) -> Result<bool, nosapi_captcha::error::HttpError> {
+    let captcha = client.captcha(challenge_id).await?;
+
+    if matches!(captcha, Captcha::Solved(_)) {
+        return Ok(true);
+    }
+
+    let resources = client.resources(&captcha).await?;
+    // Render resources.text, resources.drag_icons, and resources.drop_target.
+    // Let the user pick an icon, then submit its zero-based index.
+
+    let result = client
+        .send_answer(challenge_id, selected_icon_index)
+        .await?;
+
+    Ok(matches!(result, Captcha::Solved(_)))
+}
+```
+
+See the [docs.rs page](https://docs.rs/nosapi_captcha/) for builder options, locale values, response types, and error details.
 
 ## License
 
