@@ -1,5 +1,7 @@
-//! Implementation of the `vector`
-//! string used to identity the modification time of the `blackbox` string.
+//! Vector string stored inside a fingerprint.
+//!
+//! The vector combines opaque random-looking data with a millisecond timestamp.
+//! Gameforge uses it as part of the `blackbox` modification metadata.
 
 use crate::{utils, utils::generate_vector_string};
 use bon::bon;
@@ -17,16 +19,23 @@ use crate::mock::chrono::Utc;
 #[cfg(not(test))]
 use chrono::Utc;
 
-/// A `vector` string containing information about the modification time of the `blackbox` string.
+/// Opaque vector data plus a modification timestamp.
+///
+/// The serialized format is `<data> <unix_timestamp_millis>`. Use
+/// [`VectorString::builder`] or [`VectorString::default`] when you need a fresh
+/// value, and [`VectorString::update`] after changing a decoded fingerprint.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct VectorString(pub String);
 
 #[bon]
 impl VectorString {
+    /// Creates a vector from explicit data and timestamp values.
     pub fn new(data: String, timestamp: DateTime<chrono::Utc>) -> Self {
         VectorString(Self::format(data, timestamp))
     }
 
+    /// Builds a vector, generating random data and using the current time by
+    /// default.
     #[builder]
     pub fn builder(
         #[builder(default = generate_vector_string())] data: String,
@@ -35,11 +44,19 @@ impl VectorString {
         VectorString::new(data, timestamp)
     }
 
+    /// Returns the data part of the vector.
+    ///
+    /// Returns `None` if the vector does not contain the expected space
+    /// separator.
     pub fn data(&self) -> Option<String> {
         let divider_index = self.divider_index()?;
         Some(self.0[0..divider_index].to_string())
     }
 
+    /// Returns the timestamp part of the vector.
+    ///
+    /// Returns `None` if the vector is malformed or its timestamp is not a valid
+    /// millisecond Unix timestamp.
     pub fn timestamp(&self) -> Option<DateTime<chrono::Utc>> {
         let divider_index = self.divider_index()?;
         let raw = &self.0[divider_index + 1..].to_string();
@@ -47,8 +64,12 @@ impl VectorString {
         DateTime::<chrono::Utc>::from_timestamp_millis(i64::from_str(raw).ok()?)
     }
 
-    /// Update the modification time of the `blackbox` string using the current date and time.
-    /// This method returns `None` if no modification was needed and `Some(())` otherwise.
+    /// Refreshes the vector timestamp when it is older than one second.
+    ///
+    /// When the vector is updated, the data window is shifted and a new random
+    /// ASCII character is appended. Returns `None` only when the existing vector
+    /// is malformed; otherwise returns `Some(())`, even if the timestamp was
+    /// already recent enough and no mutation was needed.
     pub fn update(&mut self) -> Option<()> {
         let last_time = self.timestamp()?;
         let data = self.data()?;
