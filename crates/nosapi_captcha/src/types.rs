@@ -1,39 +1,59 @@
-//! Data types used in the API
+//! Types returned by the Gameforge captcha API.
 
 use chrono::{DateTime, Utc};
 use core::fmt;
 use serde::{Deserialize, Serialize};
 
-/// Information about the captcha challenge
+/// Current state of a captcha challenge.
+///
+/// A challenge can be returned as already solved or as still presented to the
+/// user. Both variants carry the same [`CaptchaData`] payload.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "status")]
 #[serde(rename_all = "camelCase")]
 pub enum Captcha {
+    /// The challenge still needs an answer.
     #[serde(rename = "presented")]
     Unsolved(CaptchaData),
+    /// The challenge has already been solved.
     Solved(CaptchaData),
 }
 
-/// Inner struct used in the [`Captcha`] enum.
+/// Metadata shared by solved and unsolved captcha states.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CaptchaData {
-    /// Captcha challenge id.
+    /// Captcha challenge id used in subsequent resource and answer requests.
     #[serde(rename = "id")]
     pub challenge_id: String,
-    /// Unix timestamp indicating when the challenge was last updated.
+    /// Timestamp indicating when the displayed challenge was last updated.
+    ///
+    /// Gameforge expects this timestamp, in milliseconds, as the query string on
+    /// resource URLs. Use [`crate::Client::resources`] to construct those URLs
+    /// for you.
     #[serde(with = "chrono::serde::ts_milliseconds")]
     pub last_updated: DateTime<Utc>,
 }
 
-/// A struct containing raw captcha resources
+/// Raw resources needed to render a captcha challenge.
+///
+/// The bytes are returned exactly as served by the API. The `text` resource is
+/// the localized instruction payload, while `drag_icons` and `drop_target` are
+/// image payloads suitable for writing to files or serving directly to a UI.
 pub struct Resources {
+    /// Localized instruction text displayed above the image-drop challenge.
     pub text: bytes::Bytes,
+    /// Sprite sheet containing the selectable drag icons.
     pub drag_icons: bytes::Bytes,
+    /// Image for the drop target.
     pub drop_target: bytes::Bytes,
 }
 
-/// Locales supported by the API
+/// Locale used when fetching challenge text and images.
+///
+/// Formatting a value with [`ToString::to_string`] returns the locale code
+/// expected by the Gameforge endpoint, for example `Locale::EnglishUS` becomes
+/// `en-US`.
 #[non_exhaustive]
 pub enum Locale {
     /// Bosnian (Bosnia and Herzegovina)

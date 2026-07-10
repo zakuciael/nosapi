@@ -1,4 +1,4 @@
-//! Error types that can be returned when connecting to the API
+//! Error types returned by the captcha client.
 
 use crate::header::HeaderMap;
 use std::io;
@@ -6,12 +6,20 @@ use thiserror::Error;
 
 pub use reqwest::Error as ClientError;
 
+/// Error returned by [`crate::Client`] methods.
+///
+/// Non-success HTTP responses are converted into [`HttpError::Status`] so
+/// callers can inspect the status code and response headers. Request building,
+/// transport, and JSON/body decoding errors are reported as [`HttpError::Client`].
 #[derive(Error, Debug)]
 pub enum HttpError {
+    /// The API returned a non-success HTTP status.
     #[error("status code: {status}")]
     Status { status: u16, headers: HeaderMap },
+    /// `reqwest` failed while building, sending, or decoding the request.
     #[error("request: {0}")]
     Client(ClientError),
+    /// An I/O error occurred while reading response bodies.
     #[error("I/O: {0}")]
     IO(#[from] io::Error),
 }

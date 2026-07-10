@@ -1,3 +1,75 @@
+//! HTTP client for Gameforge's image-drop captcha challenge.
+//!
+//! `nosapi_captcha` wraps the challenge endpoints used by Gameforge's custom
+//! captcha flow. Give the client a challenge id, and it can fetch the challenge
+//! state, download the image/text resources, submit an answer, and reset the
+//! displayed challenge after too many failed attempts.
+//!
+//! # Quick start
+//!
+//! Use [`Client::try_solve`] when you only need a best-effort automatic attempt:
+//!
+//! ```no_run
+//! use nosapi_captcha::Client;
+//!
+//! async fn solve(challenge_id: &str) -> Result<bool, nosapi_captcha::error::HttpError> {
+//!     let client = Client::builder()
+//!         .user_agent("USER_AGENT_USED_WHEN_THE_CAPTCHA_WAS_CREATED")
+//!         .build()?;
+//!
+//!     client.try_solve(challenge_id, None).await
+//! }
+//! ```
+//!
+//! `try_solve` follows the same request order as the browser UI, but it does
+//! not inspect the captcha images. It submits random answer indexes until the
+//! captcha is solved or the configured attempt limit is reached.
+//!
+//! # Manual challenge flow
+//!
+//! For a user-facing solver, call the methods directly so you can render the
+//! instructions and images, collect the selected icon, and submit that answer:
+//!
+//! ```no_run
+//! use nosapi_captcha::{Captcha, Client};
+//!
+//! async fn submit_answer(
+//!     client: &Client,
+//!     challenge_id: &str,
+//!     selected_icon_index: u8,
+//! ) -> Result<bool, nosapi_captcha::error::HttpError> {
+//!     let captcha = client.captcha(challenge_id).await?;
+//!
+//!     if matches!(captcha, Captcha::Solved(_)) {
+//!         return Ok(true);
+//!     }
+//!
+//!     let resources = client.resources(&captcha).await?;
+//!     // Render resources.text, resources.drag_icons, and resources.drop_target.
+//!     // Then submit the zero-based index of the chosen drag icon.
+//!     let _ = resources;
+//!
+//!     let result = client
+//!         .send_answer(challenge_id, selected_icon_index)
+//!         .await?;
+//!
+//!     Ok(matches!(result, Captcha::Solved(_)))
+//! }
+//! ```
+//!
+//! The accepted request sequence is:
+//!
+//! 1. [`Client::captcha`] fetches the challenge state.
+//! 2. [`Client::resources`] fetches the localized instructions and images.
+//! 3. [`Client::send_answer`] submits the selected drag icon index.
+//! 4. [`Client::reset`] starts a new displayed challenge after failed attempts.
+//!
+//! # Client configuration
+//!
+//! [`Client::builder`] method lets you set the user agent, origin, locale, base URL,
+//! and default headers. The default values target the public Gameforge captcha
+//! endpoint and `en-US` locale.
+//!
 pub mod error;
 pub mod types;
 
@@ -10,14 +82,18 @@ use crate::types::Resources;
 pub use crate::types::{Captcha, CaptchaData, Locale};
 
 pub mod header {
-    //! Re-export of the [`reqwest::header`](http://docs.rs/reqwest/*/reqwest/header) module
+    //! Re-export of [`reqwest::header`](https://docs.rs/reqwest/latest/reqwest/header/).
     pub use reqwest::header::*;
 }
 
 const MAX_PER_CHALLENGE_ATTEMPTS: u8 = 3;
 const MAX_SOLVE_ATTEMPTS: u8 = 5;
 
-/// The HTTP client for solving the Gameforge's custom captcha implementation.
+/// HTTP client for the Gameforge image-drop captcha flow.
+///
+/// Use [`Client::default`] for the standard Gameforge endpoint and locale, or
+/// [`Client::builder`] when you need to match the user agent, origin, locale, or
+/// headers from the session that produced the challenge id.
 pub struct Client {
     client: reqwest::Client,
     base_url: String,
@@ -87,9 +163,21 @@ impl Client {
 }
 
 impl Client {
-    /// This method tries to automatically solve the captcha challenge for you.
+    /// Attempts to solve a captcha challenge by trying random answers.
     ///
-    /// Returns a [`bool`] value indicating whether the captcha has been solved or not.
+    /// The method first fetches the challenge state with [`Client::captcha`],
+    /// downloads the resources with [`Client::resources`] to preserve the
+    /// expected request order, and then submits random zero-based icon indexes
+    /// with [`Client::send_answer`].
+    ///
+    /// `max_attempts` controls how many displayed challenges may be tried. Each
+    /// displayed challenge can receive up to three answers before the client
+    /// calls [`Client::reset`] and fetches a new one. Pass `None` to use the
+    /// crate default.
+    ///
+    /// Returns `Ok(true)` when the challenge is solved, `Ok(false)` when the
+    /// attempt budget is exhausted, and [`HttpError`] if any request or response
+    /// decoding step fails.
     pub async fn try_solve(
         &self,
         challenge_id: impl AsRef<str>,
@@ -98,11 +186,15 @@ impl Client {
         let challenge_id = challenge_id.as_ref();
         let max_attempts = max_attempts.unwrap_or(MAX_SOLVE_ATTEMPTS);
 
-        tracing::debug!(challenge_id, max_attempts, "Attempting to solve captcha...");
+        log::info!(
+            challenge_id,
+            max_attempts;
+            "Attempting to solve captcha..."
+        );
         let captcha = self.captcha(&challenge_id).await?;
 
         if matches!(&captcha, Captcha::Solved(_)) {
-            tracing::debug!(challenge_id, "Captcha is already solved.");
+            log::info!(challenge_id; "Captcha is already solved.");
             return Ok(true);
         }
 
@@ -115,8 +207,8 @@ impl Client {
                 let result = self.send_answer(&challenge_id, answer).await?;
 
                 if matches!(result, Captcha::Solved(_)) {
-                    tracing::debug!(
-                        challenge_id,
+                    log::info!(
+                        challenge_id;
                         "Captcha solved in {} attempt/s",
                         attempt_counter
                     );
@@ -129,24 +221,24 @@ impl Client {
             self.reset(challenge_id).await?;
         }
 
-        tracing::debug!(challenge_id, "Failed to solve captcha");
+        log::warn!(challenge_id; "Failed to solve captcha");
         Ok(false)
     }
 
-    /// Fetches the information about the captcha challenge.
+    /// Fetches the current state of a captcha challenge.
     ///
-    /// ## Additional information
-    /// This request is the first in a sequence of requests needed for the captcha answer to be accepted.
+    /// This must be the first request in the flow for a challenge id. The
+    /// response tells you whether the challenge is already solved and provides
+    /// the [`CaptchaData::last_updated`] timestamp needed for resource URLs.
     ///
-    /// Internally, the UI fetches this information to determine if the captcha challenge is already solved
-    /// and uses the [`CaptchaData.last_updated`](CaptchaData#structfield.last_updated) when fetching the resources.
+    /// `challenge_id` is the id segment from the Gameforge challenge URL.
     pub async fn captcha(&self, challenge_id: impl AsRef<str>) -> Result<Captcha, HttpError> {
         let Self {
             base_url, locale, ..
         } = self;
         let challenge_id = challenge_id.as_ref();
 
-        tracing::trace!(challenge_id, "Fetching captcha config...");
+        log::debug!(challenge_id; "Fetching captcha config...");
         Ok(self
             .get(format!("{base_url}/{challenge_id}/{locale}/"), true)
             .await?
@@ -154,16 +246,17 @@ impl Client {
             .await?)
     }
 
-    /// Fetches the resources used inside the captcha challenge
-    /// (text, drag icons, drop target)
+    /// Fetches the text and image resources for a captcha challenge.
     ///
-    /// ## Additional information
-    /// This request is the second in a sequence of requests needed for the captcha answer to be accepted.
+    /// Call this after [`Client::captcha`] and before [`Client::send_answer`].
+    /// The provided [`Captcha`] value supplies the challenge id and cache-busting
+    /// timestamp used by Gameforge's resource URLs.
     ///
-    /// This fetches the following resources:
-    /// - `text` - The text displayed on top of the captcha containing the instructions on how to solve the captcha challenge.
-    /// - `drag-icons` - A sprite-sheet of the drag icons, which the user needs to drag-and-drop onto the target, according to the instructions.
-    /// - `drop-target` - A drop target icon, on which the user needs to drag-and-drop the drag icon according to the instructions.
+    /// The returned [`Resources`] contains:
+    ///
+    /// - `text`: localized instructions shown above the captcha.
+    /// - `drag_icons`: a sprite sheet of selectable drag icons.
+    /// - `drop_target`: the target image the selected icon should be dropped on.
     pub async fn resources(&self, captcha: &Captcha) -> Result<Resources, HttpError> {
         let Self {
             base_url, locale, ..
@@ -184,7 +277,7 @@ impl Client {
             )
         };
 
-        tracing::trace!(challenge_id, "Fetching captcha resources...");
+        log::debug!(challenge_id = challenge_id.as_str(); "Fetching captcha resources...");
         let (text, drag_icons, drop_target) = futures::try_join!(
             self.get(format_url("text"), false)
                 .and_then(|v| v.bytes().map_err(|err| err.into())),
@@ -201,17 +294,17 @@ impl Client {
         })
     }
 
-    /// Sends the answer to the captcha challenge.
+    /// Submits an answer for a captcha challenge.
     ///
-    /// ## Additional information
-    /// This request is the third and the last one in a sequence of requests needed for the captcha answer to be accepted.
+    /// Call this after [`Client::captcha`] and [`Client::resources`].
     ///
-    /// Internally, the drag icons are assigned an ID from 0-3 (left to right),
-    /// and the answer is the ID of the drag icon which you would drop onto the drop target
-    /// according to the captcha instructions.
+    /// `answer` is the zero-based index of the drag icon, counted from left to
+    /// right in the `drag_icons` sprite sheet. Current challenges usually expose
+    /// three choices, so the expected values are `0`, `1`, and `2`.
     ///
-    /// Each "displayed" captcha challenge can receive a maximum of 3 incorrect answers before needing to be reset.
-    /// If you attempt to send a correct answer after exhausting the limit, the answer will be rejected regardless.
+    /// Each displayed challenge can receive a maximum of three incorrect
+    /// answers before it must be reset. If the limit is exhausted, a later
+    /// correct answer for the same displayed challenge can still be rejected.
     pub async fn send_answer(
         &self,
         challenge_id: impl AsRef<str>,
@@ -222,7 +315,7 @@ impl Client {
         } = self;
         let challenge_id = challenge_id.as_ref();
 
-        tracing::trace!(challenge_id, answer, "Sending answer...");
+        log::debug!(challenge_id, answer; "Sending answer...");
         Ok(self
             .post(
                 format!("{base_url}/{challenge_id}/{locale}"),
@@ -234,17 +327,18 @@ impl Client {
             .await?)
     }
 
-    /// Resets the captcha challenge.
+    /// Resets the displayed captcha challenge.
     ///
-    /// ## Additional information
-    /// After sending the reset request, the captcha challenge needs to be re-fetched according to the sequence of requests.
+    /// After a reset, restart the flow with [`Client::captcha`] so the next
+    /// [`Client::resources`] call uses the new [`CaptchaData::last_updated`]
+    /// timestamp.
     pub async fn reset(&self, challenge_id: impl AsRef<str>) -> Result<(), HttpError> {
         let Self {
             base_url, locale, ..
         } = self;
         let challenge_id = challenge_id.as_ref();
 
-        tracing::trace!(challenge_id, "Resetting captcha...");
+        log::debug!(challenge_id; "Resetting captcha...");
         let _ = self
             .delete(format!("{base_url}/{challenge_id}/{locale}"), false)
             .await?;
@@ -289,7 +383,7 @@ impl Client {
         }
 
         let request = add_data(request).build()?;
-        tracing::trace!(method =? request.method(), url =% request.url(), headers =? request.headers(), "Sending an HTTP request...");
+        log::debug!(method:? = request.method(), url:% = request.url(), headers:? = request.headers(); "Sending an HTTP request...");
         let response = self.client.execute(request).await?;
 
         if response.status().is_success() {
