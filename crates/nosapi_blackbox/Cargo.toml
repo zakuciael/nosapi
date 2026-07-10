@@ -11,6 +11,7 @@ homepage = "https://github.com/zakuciael/nosapi"
 documentation = "https://docs.rs/nosapi_blackbox/"
 edition.workspace = true
 authors.workspace = true
+rust-version = "1.88.0"
 
 [dependencies]
 base64 = "0.22.1"
