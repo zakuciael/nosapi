@@ -8,6 +8,7 @@ use self::error::{DecryptBlackboxError, EncryptBlackboxError};
 use crate::fingerprint::Fingerprint;
 use base64::Engine;
 use sha2::Digest;
+use std::ops::{Deref, DerefMut};
 
 pub(crate) fn create_encryption_key(gsid: String, account_id: String) -> Vec<u8> {
     let key = format!("{}-{}", gsid, account_id);
@@ -106,6 +107,38 @@ impl Blackbox {
 
         let xored = xor(&blackbox, &encryption_key);
         Ok(base64::engine::general_purpose::STANDARD.encode(&xored))
+    }
+}
+
+impl AsRef<Fingerprint> for Blackbox {
+    fn as_ref(&self) -> &Fingerprint {
+        &self.0
+    }
+}
+
+impl AsMut<Fingerprint> for Blackbox {
+    fn as_mut(&mut self) -> &mut Fingerprint {
+        &mut self.0
+    }
+}
+
+impl From<Fingerprint> for Blackbox {
+    fn from(fingerprint: Fingerprint) -> Self {
+        Self(fingerprint)
+    }
+}
+
+impl Deref for Blackbox {
+    type Target = Fingerprint;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Blackbox {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
