@@ -1,3 +1,8 @@
+//! Fingerprint schema version support.
+//!
+//! Gameforge's fingerprint payload is positional, so the schema version matters.
+//! This crate currently accepts only [`SUPPORTED_FINGERPRINT_VERSION`].
+
 pub mod error;
 
 use serde::{Deserialize, Serialize};

@@ -1,4 +1,4 @@
-//! Implementation of the `fingerprint` struct found in the `blackbox` string.
+//! Browser fingerprint data stored inside a Gameforge `blackbox`.
 
 use rand::RngExt;
 
@@ -15,7 +15,7 @@ use serde_with::{
     serde_as,
 };
 
-/// A `request` struct used when generating an encrypted `blackbox` string.
+/// Request metadata embedded in some encrypted `blackbox` payloads.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Request {
     features: Vec<u64>,
@@ -25,10 +25,14 @@ pub struct Request {
 }
 
 impl Request {
-    /// Create a new `Request` struct from `gsid` and `installation_id`
+    /// Creates request metadata from a `gsid` and installation id.
+    ///
+    /// The session id is extracted from the suffix after the final `-` in the
+    /// `gsid`.
     ///
     /// # Errors
-    /// This method can error whenever the provided `gsid` is invalid.
+    ///
+    /// Returns [`InvalidGsid`] if the `gsid` does not contain a `-` separator.
     pub fn new(gsid: String, installation_id: String) -> Result<Self, InvalidGsid> {
         let features = rng_generator().random_range(1..9999);
         let session = {
@@ -45,40 +49,75 @@ impl Request {
     }
 }
 
-/// A `fingerprint` struct containing information needed to fingerprint users.
+/// Browser fingerprint embedded in a Gameforge `blackbox`.
+///
+/// The Gameforge transport format serializes this struct as a positional tuple,
+/// so field order is part of the wire format. Prefer using [`crate::Blackbox`]
+/// to decode and encode the full value unless you specifically need direct
+/// `serde` access to the fingerprint.
 #[serde_as]
 #[derive(Serialize, SerializeTuple, Deserialize, DeserializeTuple, Clone, PartialEq, Debug)]
 pub struct Fingerprint {
+    /// Fingerprint schema version supported by this crate.
     pub version: FingerprintVersion,
+    /// IANA timezone name, for example `Europe/Warsaw`.
     pub timezone: String,
+    /// Operating system name reported by the browser environment.
     pub os_name: String,
+    /// Browser name reported by the browser environment.
     pub browser_name: String,
+    /// Browser vendor string.
     pub vendor: String,
+    /// Approximate device memory value.
     pub memory: u32,
+    /// Hardware concurrency value.
     pub concurrency: u32,
+    /// Comma-separated language list, for example `en-US,en`.
     pub languages: String,
+    /// Hash of the detected browser plugin list.
     pub plugins_hash: String,
+    /// GPU renderer/vendor string.
     pub gpu: String,
+    /// Hash of detected fonts.
     pub fonts_hash: String,
+    /// Hash produced from audio context probing.
     pub audio_context_hash: String,
+    /// Screen width in CSS pixels.
     pub width: u32,
+    /// Screen height in CSS pixels.
     pub height: u32,
+    /// Hash of supported video codecs.
     pub video_codecs_hash: String,
+    /// Hash of supported audio codecs.
     pub audio_codecs_hash: String,
+    /// Hash of media device information.
     pub media_devices_hash: String,
+    /// Hash of browser permission states.
     pub permissions_hash: String,
+    /// Numeric audio fingerprint value.
     pub audio_fingerprint: f64,
+    /// Hash produced from WebGL probing.
     pub webgl_fingerprint: String,
+    /// Numeric canvas fingerprint value.
     pub canvas_fingerprint: u32,
+    /// Time when the fingerprint was created.
     pub creation: DateTime<Utc>,
+    /// Game identifier embedded in the fingerprint.
     pub game: String,
+    /// Client/server timing delta associated with the fingerprint.
     pub delta: u32,
+    /// Optional operating system version.
     pub os_version: Option<String>,
+    /// Vector string carrying modification data and timestamp.
     #[serde_as(as = "Base64<Standard>")]
     pub vector: VectorString,
+    /// Full browser user agent string.
     pub user_agent: String,
+    /// Server time associated with the fingerprint.
     pub server_time: DateTime<Utc>,
+    /// Optional request metadata used by some encrypted flows.
     pub request: Option<Request>,
+    /// Bit mask describing detected browser environment features.
     pub browser_env_mask: u32,
 }
 
