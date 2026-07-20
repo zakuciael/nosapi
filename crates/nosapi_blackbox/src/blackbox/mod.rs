@@ -11,7 +11,7 @@ use sha2::Digest;
 use std::ops::{Deref, DerefMut};
 
 pub(crate) fn create_encryption_key(gsid: String, account_id: String) -> Vec<u8> {
-    let key = format!("{}-{}", gsid, account_id);
+    let key = format!("{gsid}-{account_id}");
     let hash = sha2::Sha512::digest(&key);
 
     hex::encode(hash).into()

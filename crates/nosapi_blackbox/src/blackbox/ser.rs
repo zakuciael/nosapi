@@ -12,7 +12,7 @@ impl Serialize for Blackbox {
             let mut serializer = serde_json::Serializer::new(&mut buf);
             serde_tuple_explicit::SerializeTuple::serialize_tuple(&self.0, &mut serializer)
                 .map_err(|err| {
-                    serde::ser::Error::custom(format!("failed to serialize fingerprint: {}", err))
+                    serde::ser::Error::custom(format!("failed to serialize fingerprint: {err}"))
                 })?;
 
             // It's safe to call `from_utf8_unchecked` since serde_json does the same under the hood
