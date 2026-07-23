@@ -1,11 +1,11 @@
 use crate::constants::VECTOR_STRING_LENGTH;
 use rand::{
     Rng,
-    distributions::{Distribution, Uniform},
+    distr::{Distribution, Uniform},
 };
 
 fn random_ascii_generator() -> Uniform<u8> {
-    Uniform::new(32, 126)
+    Uniform::new(32, 126).expect("This should be a valid ASCII char range")
 }
 
 pub fn rng_generator() -> impl Rng {
@@ -13,7 +13,7 @@ pub fn rng_generator() -> impl Rng {
     return crate::mock::rand::get_rng();
 
     #[cfg(not(test))]
-    return rand::thread_rng();
+    return rand::rng();
 }
 
 pub fn random_ascii_char() -> char {
