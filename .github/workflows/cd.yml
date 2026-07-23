@@ -34,10 +34,8 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install devenv.sh
         run: nix profile add nixpkgs#devenv
-      - name: Run release-plz
-        run: devenv shell release-plz release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release
+        run: devenv shell release-plz release --git-token "${{ secrets.GITHUB_TOKEN }}" --forge github
 
   release-plz-pr:
     name: Release-plz PR
@@ -65,7 +63,5 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install devenv.sh
         run: nix profile add nixpkgs#devenv
-      - name: Run release-plz
-        run: devenv shell release-plz release-pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release PR
+        run: devenv shell release-plz release-pr --git-token "${{ secrets.GITHUB_TOKEN }}" --forge github
