@@ -30,5 +30,6 @@ devenv.local.yaml
 # direnv
 .direnv
 
-# pre-commit
+# Generated config files
 .pre-commit-config.yaml
+.release-plz.toml
