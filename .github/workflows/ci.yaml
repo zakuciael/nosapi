@@ -1,26 +1,28 @@
-name: CD
+name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
 
 permissions:
   id-token: write
-  contents: write
-  pull-requests: read
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  release-plz-release:
-    name: Release-plz release
+  # This runs: format checks (via treefmt), clippy (via git-hooks)
+  build-shell-and-lint:
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'zakuciael' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
       - name: Install nix
         uses: cachix/install-nix-action@v31
         with:
@@ -34,24 +36,13 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install devenv.sh
         run: nix profile add nixpkgs#devenv
-      - name: Run release-plz
-        run: devenv shell release-plz release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  release-plz-pr:
-    name: Release-plz PR
+      - name: Build the devenv shell and lint codebase
+        run: devenv test
+  build:
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'zakuciael' }}
-    concurrency:
-      group: release-plz-${{ github.ref }}
-      cancel-in-progress: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
       - name: Install nix
         uses: cachix/install-nix-action@v31
         with:
@@ -65,7 +56,25 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install devenv.sh
         run: nix profile add nixpkgs#devenv
-      - name: Run release-plz
-        run: devenv shell release-plz release-pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build all crates
+        run: devenv tasks run nosapi:build:release
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Install nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - name: Configure binary cache
+        uses: Mic92/niks3-action@v1
+        with:
+          server-url: https://cache.zakku.eu
+      - name: Configure sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.10
+      - name: Install devenv.sh
+        run: nix profile add nixpkgs#devenv
+      - name: Run unit tests
+        run: devenv tasks run nosapi:test
