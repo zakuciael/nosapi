@@ -211,4 +211,20 @@ in
       };
     };
   };
+
+  files = {
+    ".release-plz.toml".toml = {
+      workspace = {
+        semver_check = true;
+        git_release_enable = true;
+        git_release_name = "{{ package }} v{{ version }}";
+        git_tag_enable = true;
+        git_tag_name = "{{ package }}/v{{ version }}";
+        pr_branch_prefix = "release-";
+        pr_labels = [ "📚 type: release" ];
+        changelog_update = true;
+        release_always = false; # Publish crates only when merging the Release PR
+      };
+    };
+  };
 }
