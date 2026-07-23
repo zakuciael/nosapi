@@ -28,7 +28,7 @@ impl<'de> Deserialize<'de> for Blackbox {
                 let blackbox = v.strip_prefix("tra:").unwrap_or(v);
                 let base64_decoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
                     .decode(blackbox)
-                    .map_err(|e| E::custom(format!("failed to decode base64: {}", e)))?;
+                    .map_err(|e| E::custom(format!("failed to decode base64: {e}")))?;
 
                 let mut gf_decoded = vec![base64_decoded[0]];
                 for i in 1..base64_decoded.len() {
@@ -47,9 +47,8 @@ impl<'de> Deserialize<'de> for Blackbox {
                 let url_decoded = percent_encoding::percent_decode(&gf_decoded).collect::<Vec<_>>();
                 let fingerprint = {
                     let mut deserializer = serde_json::Deserializer::from_slice(&url_decoded);
-                    Fingerprint::deserialize_tuple(&mut deserializer).map_err(|e| {
-                        E::custom(format!("failed to deserialize fingerprint: {}", e))
-                    })?
+                    Fingerprint::deserialize_tuple(&mut deserializer)
+                        .map_err(|e| E::custom(format!("failed to deserialize fingerprint: {e}")))?
                 };
 
                 Ok(Blackbox(fingerprint))
