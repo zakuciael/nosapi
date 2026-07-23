@@ -73,6 +73,7 @@ in
   packages = with pkgs; [
     cargo-nextest
     cargo-msrv
+    cargo-semver-checks
     release-plz
     config.languages.rust.toolchainPackage
   ];
