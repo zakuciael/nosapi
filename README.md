@@ -14,14 +14,14 @@
 
 ## Available crates
 
-- [`nosapi_blackbox`](crates/nosapi_blackbox) - A library for generating/modifying Gameforge's "blackbox" string.
+- [`nosapi_blackbox`](crates/nosapi_blackbox) - A library exposing structs for generating/modifying Gameforge's "blackbox" string.
+- [`nosapi_captcha`](crates/nosapi_captcha) - An HTTP client for solving Gameforge's custom captcha implementation.
 
 ## Planned crates
 
-- `nosapi_captcha` - An HTTP client for solving Gameforge's custom captcha implementation.
 - `nosapi_auth` - An HTTP client for game authentication using the Gameforge's Login API.
 - `nosapi_cert_utils` - A utility library providing methods for generating data derived from the Gameforge Client's certificate.
-- `nosapi_data` - A library for unpacking and repacking NosTale's `.NOS` files
+- `nosapi_data` - A library for parsing NosTale's `.NOS` files.
 
 ## License
 
